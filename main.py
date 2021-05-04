@@ -88,19 +88,7 @@ class Main:
 
 if __name__ == '__main__':
     import tkinter as tk
-    import os.path
-    if not os.path.isfile('database.db'):
-        import DB_Setup
-        r = tk.Tk()
-        db_setup = DB_Setup.DB_Setup(r)
-        db_setup.run()
-        val = db_setup.settings
-        if val is not None:
-            import DB_Connection
-            DB_Connection.open_connection()
-            DB_Connection.create_settings_table(val)
-            DB_Connection.close_connection()
-    else:
-        root = tk.Tk()
-        app = Main(root)
-        app.run()
+    import Login
+    l = tk.Tk()
+    log = Login.Login(l)
+    log.run()
