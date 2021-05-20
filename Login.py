@@ -22,7 +22,7 @@ class Login:
         self.label_4 = ttk.Label(self.frame_3)
         self.label_4.configure(anchor='center', text='Hasło:', width='15')
         self.label_4.pack(padx='5', pady='5', side='left')
-        self.entry_2 = ttk.Entry(self.frame_3)
+        self.entry_2 = ttk.Entry(self.frame_3,show='*')
         self.entry_2.pack(padx='5', pady='5', side='left')
         self.frame_3.configure(height='200', width='200')
         self.frame_3.pack(side='top')

@@ -80,63 +80,103 @@
       </object>
     </child>
     <child>
-      <object class="ttk.Button" id="button_4">
-        <property name="idtocommand">false</property>
-        <property name="text" translatable="yes">Dostawa</property>
+      <object class="ttk.Frame" id="frame_3">
+        <property name="height">200</property>
+        <property name="width">200</property>
         <layout manager="pack">
-          <property name="expand">true</property>
           <property name="fill">x</property>
-          <property name="ipady">5</property>
-          <property name="padx">3</property>
-          <property name="pady">3</property>
           <property name="propagate">True</property>
-          <property name="side">left</property>
+          <property name="side">top</property>
         </layout>
-      </object>
-    </child>
-    <child>
-      <object class="ttk.Button" id="button_5">
-        <property name="idtocommand">false</property>
-        <property name="text" translatable="yes">Aktualizacja</property>
-        <layout manager="pack">
-          <property name="expand">true</property>
-          <property name="fill">x</property>
-          <property name="ipady">5</property>
-          <property name="padx">3</property>
-          <property name="pady">3</property>
-          <property name="propagate">True</property>
-          <property name="side">right</property>
-        </layout>
-      </object>
-    </child>
-    <child>
-      <object class="ttk.Button" id="button_1_2">
-        <property name="idtocommand">false</property>
-        <property name="text" translatable="yes">Dodaj produkt</property>
-        <layout manager="pack">
-          <property name="expand">true</property>
-          <property name="fill">x</property>
-          <property name="ipady">5</property>
-          <property name="padx">3</property>
-          <property name="pady">3</property>
-          <property name="propagate">True</property>
-          <property name="side">left</property>
-        </layout>
-      </object>
-    </child>
-    <child>
-      <object class="ttk.Button" id="button_3_4">
-        <property name="idtocommand">false</property>
-        <property name="text" translatable="yes">Raport sprzedaży</property>
-        <layout manager="pack">
-          <property name="expand">true</property>
-          <property name="fill">x</property>
-          <property name="ipady">5</property>
-          <property name="padx">3</property>
-          <property name="pady">3</property>
-          <property name="propagate">True</property>
-          <property name="side">right</property>
-        </layout>
+        <child>
+          <object class="ttk.Button" id="button_1_2">
+            <property name="idtocommand">false</property>
+            <property name="text" translatable="yes">Dodaj produkt</property>
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="fill">x</property>
+              <property name="ipadx">8</property>
+              <property name="ipady">8</property>
+              <property name="padx">2</property>
+              <property name="pady">2</property>
+              <property name="propagate">True</property>
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button_3_4">
+            <property name="idtocommand">false</property>
+            <property name="text" translatable="yes">Dostawa</property>
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="fill">x</property>
+              <property name="ipadx">8</property>
+              <property name="ipady">8</property>
+              <property name="padx">2</property>
+              <property name="pady">2</property>
+              <property name="propagate">True</property>
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button_5">
+            <property name="idtocommand">false</property>
+            <property name="text" translatable="yes">Raport sprzedaży</property>
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="fill">x</property>
+              <property name="ipadx">8</property>
+              <property name="ipady">8</property>
+              <property name="padx">2</property>
+              <property name="pady">2</property>
+              <property name="propagate">True</property>
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Labelframe" id="labelframe_4">
+            <property name="height">200</property>
+            <property name="text" translatable="yes">Edycja danych</property>
+            <property name="width">200</property>
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="fill">x</property>
+              <property name="ipadx">8</property>
+              <property name="ipady">8</property>
+              <property name="padx">2</property>
+              <property name="pady">2</property>
+              <property name="propagate">True</property>
+              <property name="side">top</property>
+            </layout>
+            <child>
+              <object class="ttk.Combobox" id="combobox_3">
+                <layout manager="pack">
+                  <property name="padx">5</property>
+                  <property name="pady">5</property>
+                  <property name="propagate">True</property>
+                  <property name="side">top</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Button" id="button_6">
+                <property name="idtocommand">false</property>
+                <property name="text" translatable="yes">Edytuj</property>
+                <layout manager="pack">
+                  <property name="expand">true</property>
+                  <property name="fill">x</property>
+                  <property name="ipadx">3</property>
+                  <property name="ipady">3</property>
+                  <property name="propagate">True</property>
+                  <property name="side">top</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </object>

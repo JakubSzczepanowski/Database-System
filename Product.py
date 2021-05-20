@@ -136,7 +136,9 @@ class Product:
         try:
             if len(n) < x or len(n) > y:
                 raise E.ValueOutOfRangeError
-        except E.ValueOutOfRangeError as e:
+            if not n.replace(' ','a').isalnum():
+                raise E.TextIsNotAlphaNumeric
+        except (E.ValueOutOfRangeError,E.TextIsNotAlphaNumeric) as e:
             messagebox.showerror(parent=obj,title='Błąd',message=e)
             return False
         else:

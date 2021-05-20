@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import DB_Connection
 
-class Delivery:
+class Supply:
     def __init__(self, master=None):
         # build ui
         self.master = master
@@ -46,7 +46,7 @@ class Delivery:
         self.button_1 = ttk.Button(self.frame_1)
         self.button_1.configure(text='Dodaj')
         self.button_1.pack(expand='true', fill='x', ipady='10', padx='5', pady='5', side='top')
-        self.button_1.bind('<Button>',self.add_delivery)
+        self.button_1.bind('<Button>',self.add_supply)
         self.frame_1.configure(height='200', padding='10', width='200')
         self.frame_1.pack(side='top')
 
@@ -54,22 +54,19 @@ class Delivery:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
-        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()].replace(' ','_'))
+        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
 
-    def add_delivery(self,event):
+    def add_supply(self,event):
         import Product as P
         from datetime import datetime
         pr = P.Product(*DB_Connection.get_settings())
-        pr.Section = (self.combobox_1['values'][self.combobox_1.current()].replace(' ','_'),self.master)
+        pr.Section = (self.combobox_1['values'][self.combobox_1.current()],self.master)
         pr.Name = (self.combobox_2['values'][self.combobox_2.current()],self.master)
         pr.Quantity_price = (self.entry_3.get(),self.master)
         pr.Amount = (self.entry_4.get(),self.master)
-        x = DB_Connection.get_last_amount_and_quantity_price(self.master,pr)
-        amount = x[0] if x is not None else 0
-        pr.Amount = (str(amount + pr.Amount),self.master)
         pr.Date = datetime.today().strftime('%Y-%m-%d')
         if self.final_prod_check([pr.Quantity_price,pr.Amount,pr.Date]):
-            DB_Connection.insert_update(self.master,pr)
+            DB_Connection.insert_supply(self.master,pr)
 
     def final_prod_check(self,prod):
         for p in prod:

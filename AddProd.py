@@ -56,7 +56,7 @@ class AddProd:
         import Product as P
         import DB_Connection
         pr = P.Product(*DB_Connection.get_settings())
-        pr.Section = (self.entry_1.get().lower().replace(' ','_'),self.master)
+        pr.Section = (self.entry_1.get(),self.master)
         pr.Name = (self.entry_2.get(),self.master)
         pr.Netto_price = (self.entry_3.get(),self.master)
         pr.Vat_percentage = (self.entry_4.get(),self.master)

@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 import DB_Connection
+import Exceptions as E
 
 
 class Sale:
@@ -48,27 +49,19 @@ class Sale:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
-        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()].replace(' ','_'))
+        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
 
     def add_sale(self,event):
         import Product as P
         from datetime import datetime
         pr = P.Product(*DB_Connection.get_settings())
-        pr.Section = (self.combobox_1['values'][self.combobox_1.current()].replace(' ','_'),self.master)
+        pr.Section = (self.combobox_1['values'][self.combobox_1.current()],self.master)
         pr.Name = (self.combobox_2['values'][self.combobox_2.current()],self.master)
         pr.Amount = (self.entry_1.get(),self.master)
-        x = DB_Connection.get_last_amount_and_quantity_price(self.master,pr)
-        if x is not None:
-            if (x[0] - pr.Amount) > 0:
-                pr.Amount = (str(x[0] - pr.Amount),self.master)
-                pr.quantity_price = x[1]
-                pr.Date = datetime.today().strftime('%Y-%m-%d')
-                if self.final_prod_check([pr.Amount,pr.Date]):
-                    DB_Connection.insert_update(self.master,pr)
-            else:
-                messagebox.showerror('Błąd','Nie posiadasz takiej ilości w magazynie')
-        else:
-            messagebox.showerror(parent=self.master,title='Błąd',message='Brak danych dotyczących dostawy')
+        if DB_Connection.check_amount_correctness(self.master):
+            pr.Date = datetime.today().strftime('%Y-%m-%d')
+            if self.final_prod_check([pr.Amount,pr.Date]):
+                DB_Connection.insert_sale(self.master,pr)
 
     def final_prod_check(self,prod):
         for p in prod:

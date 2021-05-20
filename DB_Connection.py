@@ -24,7 +24,21 @@ def create_settings_table(data):
             netto_price_max integer
         )""")
 
-        #conn.commit()
+        cursor.execute(f"""CREATE TABLE Products (
+        id_product integer PRIMARY KEY,
+        name text,
+        netto_price real,
+        vat_percentage integer,
+        section text
+        )""")
+
+        cursor.execute("""CREATE TABLE Data (
+        id_record integer PRIMARY KEY,
+        quantity_price real,
+        amount integer,
+        date text,
+        id_product integer
+        )""")
 
         cursor.execute("""INSERT INTO settings(name_min,name_max,section_min,section_max,quantity_price_min,
         quantity_price_max,amount_min,amount_max,netto_price_min,netto_price_max)
@@ -41,45 +55,45 @@ def get_settings():
     return cursor.fetchall()[0]
 
 def get_sections():
-    cursor.execute("select name from sqlite_master where type = 'table'")
+    cursor.execute("SELECT section FROM Products")
     sections = []
     for elem in cursor.fetchall():
-        if elem[0] not in {'settings','produkty'}:
-            sections.append(elem[0].replace('_',' '))
+        sections.append(elem[0].replace('_',' '))
     return sections
 
 def get_products(section):
-    cursor.execute(f"SELECT name FROM {section}")
+    cursor.execute(f"SELECT name FROM Products WHERE section='{section}'")
     products = []
     for elem in cursor.fetchall():
         products.append(elem[0])
     return products
 
-def get_last_amount_and_quantity_price(obj,prod):
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='produkty'")
-    if cursor.fetchone() is None:
-        return None
-    cursor.execute(f"""SELECT amount,quantity_price FROM produkty JOIN {prod.Section} 
-    ON produkty.id_section={prod.Section}.id_section WHERE {prod.Section}.name='{prod.Name}'
-    AND produkty.id_product=(SELECT MAX(id_product) FROM produkty)""")
-    return cursor.fetchone()
+def select_products():
+    cursor.execute("SELECT * FROM Products")
+    return cursor.fetchall()
+
+def check_amount_correctness(obj):
+    try:
+        cursor.execute("SELECT amount,quantity_price FROM Data")
+        result = 0
+        for elem in cursor.fetchall():
+            result += elem[0] if elem[1] is not None else -elem[0]
+        if result >= 0:
+            return True
+        raise E.SaleGreaterThenCurrentAmount
+    except E.SaleGreaterThenCurrentAmount as e:
+        messagebox.showerror(parent=obj,title='Błąd',message=e)
+        return False
 
 def insert_product(obj,prod):
     try:
-        cursor.execute(f"""CREATE TABLE IF NOT EXISTS {prod.Section} (
-        id_section integer PRIMARY KEY,
-        name text,
-        netto_price real,
-        vat_percentage integer
-        )""")
-        conn.commit()
-        cursor.execute(f"SELECT name FROM {prod.Section}")
+        cursor.execute(f"SELECT name FROM Products WHERE section='{prod.Section}'")
         for elem in cursor.fetchall():
             if elem[0] == prod.Name:
                 raise E.NameInThatSectionExistError
-        cursor.execute(f"""INSERT INTO {prod.Section}(name,netto_price,vat_percentage) 
-        VALUES (:name,:netto_price,:vat_percentage)""",\
-            {'name':prod.Name,'netto_price':prod.Netto_price,'vat_percentage':prod.Vat_percentage})
+        cursor.execute(f"""INSERT INTO Products (name,netto_price,vat_percentage,section) 
+        VALUES (:name,:netto_price,:vat_percentage,:section)""",\
+            {'name':prod.Name,'netto_price':prod.Netto_price,'vat_percentage':prod.Vat_percentage,'section':prod.Section})
         conn.commit()
     except E.NameInThatSectionExistError as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)
@@ -88,22 +102,35 @@ def insert_product(obj,prod):
     else:
         messagebox.showinfo(parent=obj,title='Info',message='Produkt został pomyślnie dodany')
 
-def insert_update(obj,prod):
+def edit_product(obj,prod,id):
     try:
-        cursor.execute("""CREATE TABLE IF NOT EXISTS produkty (
-        id_product integer PRIMARY KEY,
-        quantity_price real,
-        amount integer,
-        date text,
-        section text,
-        id_section integer
-        )""")
+        cursor.execute(f"""UPDATE Products SET name='{prod.Name}',netto_price='{prod.Netto_price}',
+        vat_percentage='{prod.Vat_percentage}',section='{prod.Section}' WHERE id_product='{id}'
+        """)
         conn.commit()
-        cursor.execute(f"SELECT id_section FROM {prod.Section} WHERE name='{prod.Name}'")
-        id_section = cursor.fetchall()[0][0]
-        cursor.execute("""INSERT INTO produkty(quantity_price,amount,date,section,id_section) 
-        VALUES (:quantity_price,:amount,:date,:section,:id_section)""",\
-            {'quantity_price':prod.Quantity_price,'amount':prod.Amount,'date':prod.Date,'section':prod.Section,'id_section':id_section})
+    except Exception as e:
+        messagebox.showerror(parent=obj,title='Błąd',message=e)
+
+def insert_supply(obj,prod):
+    try:
+        cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}'")
+        id_product = cursor.fetchone()[0]
+        cursor.execute("""INSERT INTO Data(quantity_price,amount,date,id_product) 
+        VALUES (:quantity_price,:amount,:date,:id_product)""",\
+            {'quantity_price':prod.Quantity_price,'amount':prod.Amount,'date':prod.Date,'id_product':id_product})
+        conn.commit()
+    except Exception as e:
+        messagebox.showerror(parent=obj,title='Błąd',message=e)
+    else:
+        messagebox.showinfo(parent=obj,title='Info',message='Rekord został pomyślnie dodany')
+
+def insert_sale(obj,prod):
+    try:
+        cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}'")
+        id_product = cursor.fetchone()[0]
+        cursor.execute("""INSERT INTO Data(quantity_price,amount,date,id_product) 
+        VALUES (null,:amount,:date,:id_product)""",\
+            {'amount':prod.Amount,'date':prod.Date,'id_product':id_product})
         conn.commit()
     except Exception as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)

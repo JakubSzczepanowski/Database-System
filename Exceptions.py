@@ -14,3 +14,11 @@ class NameInThatSectionExistError(Exception):
     def __init__(self):
         super(NameInThatSectionExistError,self).__init__('Produkt o danej nazwie już istnieje w danym dziale')
 
+class TextIsNotAlphaNumeric(Exception):
+    def __init__(self):
+        super(TextIsNotAlphaNumeric,self).__init__('Ten tekst nie jest w formie alfanumerycznej')
+
+class SaleGreaterThenCurrentAmount(Exception):
+    def __init__(self):
+        super(SaleGreaterThenCurrentAmount,self).__init__('Nie masz takiej ilości towaru w magazynie')
+
