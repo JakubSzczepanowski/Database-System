@@ -8,7 +8,7 @@ def open_connection():
     print('Otwarto połączenie')
     cursor = conn.cursor()
 
-def create_settings_table(data):
+def create_settings_table(obj,data):
     try:
         cursor.execute("""CREATE TABLE settings (
             id_setting integer PRIMARY KEY,
@@ -45,9 +45,9 @@ def create_settings_table(data):
         VALUES (?,?,?,?,?,?,?,?,?,?)""",data)
         conn.commit()
     except Exception as e:
-        messagebox.showerror(title='Błąd',message=e)
+        messagebox.showerror(parent=obj,title='Błąd',message=e)
     else:
-        messagebox.showinfo(title='Info',message='Ustawienia dotyczące pól zostały pomyślnie dodane')
+        messagebox.showinfo(parent=obj,title='Info',message='Ustawienia dotyczące pól zostały pomyślnie dodane')
 
 def get_settings():
     cursor.execute("""SELECT name_min,name_max,section_min,section_max,quantity_price_min,
@@ -73,13 +73,13 @@ def select_products():
     return cursor.fetchall()
 
 def select_supplies():
-    cursor.execute("""SELECT Data.id_record,Products.name,Data.quantity_price,Data.amount,Products.section FROM Data
+    cursor.execute("""SELECT Data.id_record,Data.date,Products.name,Data.quantity_price,Data.amount,Products.section FROM Data
     JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NOT NULL
     """)
     return cursor.fetchall()
 
 def select_sales():
-    cursor.execute("""SELECT Data.id_record,Products.name,Data.amount,Products.section FROM Data
+    cursor.execute("""SELECT Data.id_record,Data.date,Products.name,Data.amount,Products.section FROM Data
     JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL
     """)
     return cursor.fetchall()

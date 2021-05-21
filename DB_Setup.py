@@ -5,7 +5,8 @@ from tkinter import messagebox
 class DB_Setup:
     def __init__(self, master=None):
         # build ui
-        self.frame_1 = ttk.Frame(master)
+        self.master = master
+        self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
         self.label_1.configure(font='{Arial} 24 {}', text='Ustawienia początkowe')
         self.label_1.pack(anchor='center', fill='y', side='top')
@@ -64,7 +65,7 @@ class DB_Setup:
         self.button_1 = ttk.Button(self.frame_1)
         self.button_1.configure(text='Dodaj')
         self.button_1.pack(expand='true', fill='x', ipady='10', padx='5', pady='5', side='bottom')
-        self.button_1.bind('<Button>',self.get_settings,add='')
+        self.button_1.bind('<Button>',self.get_settings)
         self.label_1_2 = ttk.Label(self.frame_1)
         self.label_1_2.configure(font='{Arial} 7 {}', text='*UWAGA! Wszystkie ustawienia dotyczą ilości cyfr lub znaków elementów wpisywanych do bazy')
         self.label_1_2.pack(side='left')
@@ -79,7 +80,18 @@ class DB_Setup:
         values = [self.entry_1.get(),self.entry_1_2.get(),self.entry_2.get(),self.entry_2_2.get(),\
             self.entry_3.get(),self.entry_1_2_3.get(),self.entry_4.get(),self.entry_4_5.get(),self.entry_5.get(),\
                 self.entry_6_7.get()]
-        self.settings = self.check_entry_correctness(values)
+        val = self.check_entry_correctness(values)
+        if val is not None:
+            self.settings = val
+            import DB_Connection
+            DB_Connection.open_connection()
+            DB_Connection.create_settings_table(self.master,val)
+            DB_Connection.close_connection()
+            import main
+            root = tk.Tk()
+            app = main.Main(root)
+            self.master.destroy()
+            app.run()
         
     def check_entry_correctness(self,arr):
         import Exceptions as E

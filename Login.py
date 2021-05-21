@@ -61,12 +61,6 @@ class Login:
                     db_setup = DB_Setup.DB_Setup(r)
                     self.master.destroy()
                     db_setup.run()
-                    val = db_setup.settings
-                    if val is not None:
-                        import DB_Connection
-                        DB_Connection.open_connection()
-                        DB_Connection.create_settings_table(val)
-                        DB_Connection.close_connection()
                 else:
                     import main
                     root = tk.Tk()

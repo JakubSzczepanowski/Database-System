@@ -48,15 +48,17 @@ class Edit:
             self.frame_1.pack(side='top')
 
         elif self.type == 1:
-            self.treeview_1['columns'] = ('ID','Nazwa','Cena hurtowa','Ilość','Dział')
+            self.treeview_1['columns'] = ('ID','Data','Nazwa','Cena hurtowa','Ilość','Dział')
             self.treeview_1.column("#0", width=0)
             self.treeview_1.column('ID', width=100)
+            self.treeview_1.column('Data', width=100)
             self.treeview_1.column('Nazwa', width=100)
             self.treeview_1.column('Cena hurtowa', width=100)
             self.treeview_1.column('Ilość', width=100)
             self.treeview_1.column('Dział', width=100)
             self.treeview_1.heading("#0", text='', anchor="w")
             self.treeview_1.heading('ID', text='ID')
+            self.treeview_1.heading('Data', text='Data')
             self.treeview_1.heading('Nazwa', text='Nazwa')
             self.treeview_1.heading('Cena hurtowa', text='Cena hurtowa')
             self.treeview_1.heading('Ilość', text='Ilość')
@@ -76,14 +78,16 @@ class Edit:
             self.frame_1.pack(side='top')
 
         elif self.type == 2:
-            self.treeview_1['columns'] = ('ID','Nazwa','Ilość','Dział')
+            self.treeview_1['columns'] = ('ID','Data','Nazwa','Ilość','Dział')
             self.treeview_1.column("#0", width=0)
             self.treeview_1.column('ID', width=100)
+            self.treeview_1.column('Data', width=100)
             self.treeview_1.column('Nazwa', width=100)
             self.treeview_1.column('Ilość', width=100)
             self.treeview_1.column('Dział', width=100)
             self.treeview_1.heading("#0", text='', anchor="w")
             self.treeview_1.heading('ID', text='ID')
+            self.treeview_1.heading('Data', text='Data')
             self.treeview_1.heading('Nazwa', text='Nazwa')
             self.treeview_1.heading('Ilość', text='Ilość')
             self.treeview_1.heading('Dział', text='Dział')
@@ -140,7 +144,7 @@ class Edit:
                     DB_Connection.edit_supply(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],pr.Quantity_price,pr.Amount,item[4]))
+                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],item[2],pr.Quantity_price,pr.Amount,item[5]))
                     self.treeview_1.delete(focused)
             else:
                 pr.Amount = (self.entry_1.get(),self.master)
@@ -148,7 +152,7 @@ class Edit:
                     DB_Connection.edit_sale(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],pr.Amount,item[3]))
+                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],item[2],pr.Amount,item[4]))
                     self.treeview_1.delete(focused)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz edytować')
@@ -189,15 +193,15 @@ class Edit:
         self.entry_2.delete(0,END)
         item = self.treeview_1.item(selected)['values']
         self.id = item[0]
-        self.entry_1.insert(0,item[2])
-        self.entry_2.insert(0,item[3])
+        self.entry_1.insert(0,item[3])
+        self.entry_2.insert(0,item[4])
 
     def on_select_sales(self,event):
         selected = event.widget.focus()
         self.entry_1.delete(0,END)
         item = self.treeview_1.item(selected)['values']
         self.id = item[0]
-        self.entry_1.insert(0,item[2])
+        self.entry_1.insert(0,item[3])
 
     def run(self):
         self.mainwindow.mainloop()
