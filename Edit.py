@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter.constants import END, X
 import tkinter.ttk as ttk
+from tkinter.constants import END
 import DB_Connection
 from tkinter import messagebox
 
@@ -75,6 +75,30 @@ class Edit:
             self.frame_1.configure(height='200', padding='8', width='200')
             self.frame_1.pack(side='top')
 
+        elif self.type == 2:
+            self.treeview_1['columns'] = ('ID','Nazwa','Ilość','Dział')
+            self.treeview_1.column("#0", width=0)
+            self.treeview_1.column('ID', width=100)
+            self.treeview_1.column('Nazwa', width=100)
+            self.treeview_1.column('Ilość', width=100)
+            self.treeview_1.column('Dział', width=100)
+            self.treeview_1.heading("#0", text='', anchor="w")
+            self.treeview_1.heading('ID', text='ID')
+            self.treeview_1.heading('Nazwa', text='Nazwa')
+            self.treeview_1.heading('Ilość', text='Ilość')
+            self.treeview_1.heading('Dział', text='Dział')
+            self.add_items(DB_Connection.select_sales())
+            self.treeview_1.bind('<<TreeviewSelect>>', self.on_select_sales)
+
+            self.frame_2 = ttk.Frame(self.frame_1)
+            self.entry_1 = ttk.Entry(self.frame_2)
+            self.entry_1.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
+            self.frame_2.configure(height='200', width='200')
+            self.frame_2.pack(fill='x', side='top')
+
+            self.frame_1.configure(height='200', padding='8', width='200')
+            self.frame_1.pack(side='top')
+
         self.frame_3 = ttk.Frame(self.frame_1)
         self.button_1 = ttk.Button(self.frame_3)
         self.button_1.configure(text='Edytuj')
@@ -118,12 +142,23 @@ class Edit:
                     item = self.treeview_1.item(focused)['values']
                     self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],pr.Quantity_price,pr.Amount,item[4]))
                     self.treeview_1.delete(focused)
+            else:
+                pr.Amount = (self.entry_1.get(),self.master)
+                if self.final_prod_check([pr.Amount]):
+                    DB_Connection.edit_sale(self.master,pr,self.id)
+                    focused = self.treeview_1.focus()
+                    item = self.treeview_1.item(focused)['values']
+                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],pr.Amount,item[3]))
+                    self.treeview_1.delete(focused)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz edytować')
 
     def delete(self,event):
         if self.id is not None and self.treeview_1.selection() != ():
-            DB_Connection.delete_product(self.id)
+            if self.type == 0:
+                DB_Connection.delete_product(self.id)
+            else:
+                DB_Connection.delete_supply_or_sale(self.id)
             focused = self.treeview_1.focus()
             self.treeview_1.delete(focused)
         else:
@@ -156,6 +191,13 @@ class Edit:
         self.id = item[0]
         self.entry_1.insert(0,item[2])
         self.entry_2.insert(0,item[3])
+
+    def on_select_sales(self,event):
+        selected = event.widget.focus()
+        self.entry_1.delete(0,END)
+        item = self.treeview_1.item(selected)['values']
+        self.id = item[0]
+        self.entry_1.insert(0,item[2])
 
     def run(self):
         self.mainwindow.mainloop()
