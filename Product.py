@@ -102,7 +102,9 @@ class Product:
 
     def check_int_correctness(self,obj,n:str,x:int,y:int) -> int:
         try:
-            if len(n) < x or len(n) > y:
+            if n == '':
+                raise E.EmptyFieldError
+            elif len(n) < x or len(n) > y:
                 raise E.ValueOutOfRangeError
             n = int(n)
             if n < 0:
@@ -110,7 +112,7 @@ class Product:
         except ValueError:
             messagebox.showerror(parent=obj,title='Błąd',message='W polu przeznaczonym na liczbę wstawiono znaki')
             return None
-        except (E.ValueOutOfRangeError,E.NegativeValueError) as e:
+        except (E.ValueOutOfRangeError,E.NegativeValueError,E.EmptyFieldError) as e:
             messagebox.showerror(parent=obj,title='Błąd',message=e)
             return None
         else:
@@ -118,7 +120,9 @@ class Product:
 
     def check_float_correctness(self,obj,n:str,x:int,y:int) -> float:
         try:
-            if len(n.split('.')[0]) < x or len(n.split('.')[0]) > y:
+            if n == '':
+                raise E.EmptyFieldError
+            elif len(n.split('.')[0]) < x or len(n.split('.')[0]) > y:
                 raise E.ValueOutOfRangeError
             n = round(float(n),2)
             if n < 0:
@@ -126,7 +130,7 @@ class Product:
         except ValueError as e:
             messagebox.showerror(parent=obj,title='Błąd',message='W polu przeznaczonym na liczbę wstawiono znaki')
             return None
-        except (E.ValueOutOfRangeError,E.NegativeValueError) as e:
+        except (E.ValueOutOfRangeError,E.NegativeValueError,E.EmptyFieldError) as e:
             messagebox.showerror(parent=obj,title='Błąd',message=e)
             return None
         else:
@@ -134,14 +138,21 @@ class Product:
 
     def check_str_correctness(self,obj,n:str,x:int,y:int) -> bool:
         try:
-            if len(n) < x or len(n) > y:
+            if n == '':
+                raise E.EmptyFieldError
+            elif len(n) < x or len(n) > y:
                 raise E.ValueOutOfRangeError
             if not n.replace(' ','a').isalnum():
                 raise E.TextIsNotAlphaNumeric
-        except (E.ValueOutOfRangeError,E.TextIsNotAlphaNumeric) as e:
+        except (E.ValueOutOfRangeError,E.TextIsNotAlphaNumeric,E.EmptyFieldError) as e:
             messagebox.showerror(parent=obj,title='Błąd',message=e)
             return False
         else:
             return True
 
 
+    def final_prod_check(self,prod):
+        for p in prod:
+            if p is None:
+                return False
+        return True

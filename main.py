@@ -6,6 +6,7 @@ class Main:
     def __init__(self, master=None):
         # build ui
         self.master = master
+        self.master.title('Panel główny')
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
         self.label_1.configure(anchor='w', font='{Arial} 24 {}', takefocus=False, text='Analizator procesu sprzedaży')
@@ -36,9 +37,8 @@ class Main:
         self.button_6.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
         self.button_6.bind('<Button>',self.open_sale)
         self.labelframe_2 = ttk.Labelframe(self.frame_2)
-        self.combobox_1 = ttk.Combobox(self.labelframe_2)
+        self.combobox_1 = ttk.Combobox(self.labelframe_2,state="readonly",values=('Produkty','Dostawy','Sprzedaże'))
         self.combobox_1.pack(padx='5', pady='5', side='top')
-        self.combobox_1['values'] = ('Produkty','Dostawy','Sprzedaże')
         self.combobox_1.current(0)
         self.button_6 = ttk.Button(self.labelframe_2)
         self.button_6.configure(text='Edytuj')
@@ -53,6 +53,11 @@ class Main:
 
         # Main widget
         self.mainwindow = self.frame_1
+        self.master.resizable(0,0)
+        x = self.master.winfo_screenwidth() // 2 - 514 // 2 - 10
+        y = self.master.winfo_screenheight() // 2 - 309 // 2 - 10
+        self.master.geometry(f'+{x}+{y}')
+        self.master.attributes("-topmost", True)
 
     def open_sale(self,event):
         import Sale

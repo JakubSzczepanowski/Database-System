@@ -71,21 +71,25 @@ class DB_Setup:
         self.label_1_2.pack(side='left')
         self.frame_1.configure(height='200', padding='10', width='200')
         self.frame_1.pack(side='top')
-        self.settings = None
 
         # Main widget
         self.mainwindow = self.frame_1
+        self.master.resizable(0,0)
+        x = self.master.winfo_screenwidth() // 2 - 430 // 2 - 10
+        y = self.master.winfo_screenheight() // 2 - 286 // 2 - 10
+        self.master.geometry(f'+{x}+{y}')
+        self.master.title('Ustawienia początkowe')
+        self.master.attributes("-topmost", True)
 
     def get_settings(self,event):
         values = [self.entry_1.get(),self.entry_1_2.get(),self.entry_2.get(),self.entry_2_2.get(),\
             self.entry_3.get(),self.entry_1_2_3.get(),self.entry_4.get(),self.entry_4_5.get(),self.entry_5.get(),\
                 self.entry_6_7.get()]
-        val = self.check_entry_correctness(values)
-        if val is not None:
-            self.settings = val
+        settings = self.check_entry_correctness(values)
+        if settings is not None:
             import DB_Connection
             DB_Connection.open_connection()
-            DB_Connection.create_settings_table(self.master,val)
+            DB_Connection.create_settings_table(self.master,settings)
             DB_Connection.close_connection()
             import main
             root = tk.Tk()

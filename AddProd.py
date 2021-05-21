@@ -49,8 +49,10 @@ class AddProd:
         self.frame_1.configure(height='200', padding='10', width='200')
         self.frame_1.pack(side='top')
 
-        # Main widget
-        self.mainwindow = self.frame_1
+        x = self.master.winfo_screenwidth() // 2 - 301 // 2 - 10
+        y = self.master.winfo_screenheight() // 2 - 223 // 2 - 10
+        self.master.geometry(f'+{x}+{y}')
+        self.master.title('Dodaj nowy produkt')
     
     def add_product(self,event):
         import Product as P
@@ -60,11 +62,5 @@ class AddProd:
         pr.Name = (self.entry_2.get(),self.master)
         pr.Netto_price = (self.entry_3.get(),self.master)
         pr.Vat_percentage = (self.entry_4.get(),self.master)
-        if self.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
+        if pr.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
             DB_Connection.insert_product(self.master,pr)
-
-    def final_prod_check(self,prod):
-        for p in prod:
-            if p is None:
-                return False
-        return True

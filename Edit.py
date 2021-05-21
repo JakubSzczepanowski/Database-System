@@ -44,9 +44,6 @@ class Edit:
             self.frame_2.configure(height='200', width='200')
             self.frame_2.pack(fill='x', side='top')
 
-            self.frame_1.configure(height='200', padding='8', width='200')
-            self.frame_1.pack(side='top')
-
         elif self.type == 1:
             self.treeview_1['columns'] = ('ID','Data','Nazwa','Cena hurtowa','Ilość','Dział')
             self.treeview_1.column("#0", width=0)
@@ -74,9 +71,6 @@ class Edit:
             self.frame_2.configure(height='200', width='200')
             self.frame_2.pack(fill='x', side='top')
 
-            self.frame_1.configure(height='200', padding='8', width='200')
-            self.frame_1.pack(side='top')
-
         elif self.type == 2:
             self.treeview_1['columns'] = ('ID','Data','Nazwa','Ilość','Dział')
             self.treeview_1.column("#0", width=0)
@@ -100,9 +94,6 @@ class Edit:
             self.frame_2.configure(height='200', width='200')
             self.frame_2.pack(fill='x', side='top')
 
-            self.frame_1.configure(height='200', padding='8', width='200')
-            self.frame_1.pack(side='top')
-
         self.frame_3 = ttk.Frame(self.frame_1)
         self.button_1 = ttk.Button(self.frame_3)
         self.button_1.configure(text='Edytuj')
@@ -114,10 +105,21 @@ class Edit:
         self.button_2.bind('<Button>', self.delete)
         self.frame_3.configure(height='200', width='200')
         self.frame_3.pack(fill='x', side='top')
+        self.frame_1.configure(height='200', padding='8', width='200')
+        self.frame_1.pack(side='top')
         
-
         # Main widget
         self.mainwindow = self.frame_1
+        if self.type == 0:
+            a,b = 600,349
+        elif self.type == 1:
+            a,b = 619,346
+        else:
+            a,b = 519,346
+        x = self.master.winfo_screenwidth() // 2 - a // 2 - 10
+        y = self.master.winfo_screenheight() // 2 - b // 2 - 10
+        self.master.geometry(f'+{x}+{y}')
+        self.master.title('Edytuj')
 
     def add_items(self,records):
         for r in records:
@@ -132,7 +134,7 @@ class Edit:
                 pr.Netto_price = (self.entry_2.get(),self.master)
                 pr.Vat_percentage = (self.entry_3.get(),self.master)
                 pr.Section = (self.entry_4.get(),self.master)
-                if self.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
+                if pr.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
                     DB_Connection.edit_product(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     self.treeview_1.insert("", str(focused)[1:], values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section))
@@ -140,7 +142,7 @@ class Edit:
             elif self.type == 1:
                 pr.Quantity_price = (self.entry_1.get(),self.master)
                 pr.Amount = (self.entry_2.get(),self.master)
-                if self.final_prod_check([pr.Quantity_price,pr.Amount]):
+                if pr.final_prod_check([pr.Quantity_price,pr.Amount]):
                     DB_Connection.edit_supply(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
@@ -148,7 +150,7 @@ class Edit:
                     self.treeview_1.delete(focused)
             else:
                 pr.Amount = (self.entry_1.get(),self.master)
-                if self.final_prod_check([pr.Amount]):
+                if pr.final_prod_check([pr.Amount]):
                     DB_Connection.edit_sale(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
@@ -167,12 +169,6 @@ class Edit:
             self.treeview_1.delete(focused)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz usunąć')
-
-    def final_prod_check(self,prod):
-        for p in prod:
-            if p is None:
-                return False
-        return True
 
     def on_select_products(self,event):
         selected = event.widget.focus()

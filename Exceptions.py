@@ -22,3 +22,7 @@ class SaleGreaterThenCurrentAmount(Exception):
     def __init__(self):
         super(SaleGreaterThenCurrentAmount,self).__init__('Nie masz takiej ilości towaru w magazynie')
 
+class EmptyFieldError(Exception):
+    def __init__(self):
+        super(EmptyFieldError,self).__init__('Wpisano puste pole')
+

@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import tkinter.ttk as ttk
 
 
@@ -35,6 +36,11 @@ class Login:
 
         # Main widget
         self.mainwindow = self.frame_1
+        self.master.resizable(0,0)
+        x = self.master.winfo_screenwidth() // 2 - 240 // 2 - 10
+        y = self.master.winfo_screenheight() // 2 - 151 // 2 - 10
+        self.master.geometry(f'+{x}+{y}')
+        self.master.title('Zaloguj się')
 
     def login(self,event):
         import hashlib
@@ -67,6 +73,8 @@ class Login:
                     app = main.Main(root)
                     self.master.destroy()
                     app.run()
+            else:
+                messagebox.showerror('Błąd logowania','Niepoprawne login lub hasło')
 
 
     def run(self):

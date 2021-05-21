@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
 import DB_Connection
 
 class Supply:
@@ -14,7 +15,7 @@ class Supply:
         self.label_6 = ttk.Label(self.frame_6)
         self.label_6.configure(text='Dział', width='15')
         self.label_6.pack(fill='x', padx='5', pady='5', side='left')
-        self.combobox_1 = ttk.Combobox(self.frame_6)
+        self.combobox_1 = ttk.Combobox(self.frame_6,state="readonly")
         self.combobox_1.pack(expand='true', fill='x', side='left')
         self.combobox_1.bind('<<ComboboxSelected>>',self.fill_combobox2)
         self.frame_6.configure(height='200', width='200')
@@ -23,7 +24,7 @@ class Supply:
         self.label_2 = ttk.Label(self.frame_2)
         self.label_2.configure(text='Nazwa', width='15')
         self.label_2.pack(fill='x', padx='5', pady='5', side='left')
-        self.combobox_2 = ttk.Combobox(self.frame_2)
+        self.combobox_2 = ttk.Combobox(self.frame_2,state="readonly")
         self.combobox_2.pack(expand='true', fill='x', side='left')
         self.frame_2.configure(height='200', width='200')
         self.frame_2.pack(expand='true', fill='x', side='top')
@@ -50,6 +51,11 @@ class Supply:
         self.frame_1.configure(height='200', padding='10', width='200')
         self.frame_1.pack(side='top')
 
+        x = self.master.winfo_screenwidth() // 2 - 278 // 2 - 10
+        y = self.master.winfo_screenheight() // 2 - 231 // 2 - 10
+        self.master.geometry(f'+{x}+{y}')
+        self.master.title('Dodaj nową dostawę')
+
     def fill_combobox1(self):
         self.combobox_1['values'] = DB_Connection.get_sections()
 
@@ -57,19 +63,17 @@ class Supply:
         self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
 
     def add_supply(self,event):
-        import Product as P
-        from datetime import datetime
-        pr = P.Product(*DB_Connection.get_settings())
-        pr.Section = (self.combobox_1['values'][self.combobox_1.current()],self.master)
-        pr.Name = (self.combobox_2['values'][self.combobox_2.current()],self.master)
-        pr.Quantity_price = (self.entry_3.get(),self.master)
-        pr.Amount = (self.entry_4.get(),self.master)
-        pr.Date = datetime.today().strftime('%Y-%m-%d')
-        if self.final_prod_check([pr.Quantity_price,pr.Amount,pr.Date]):
-            DB_Connection.insert_supply(self.master,pr)
-
-    def final_prod_check(self,prod):
-        for p in prod:
-            if p is None:
-                return False
-        return True
+        s,n = self.combobox_1.current(),self.combobox_2.current()
+        if s != -1 and n != -1:
+            import Product as P
+            from datetime import datetime
+            pr = P.Product(*DB_Connection.get_settings())
+            pr.Section = (self.combobox_1['values'][s],self.master)
+            pr.Name = (self.combobox_2['values'][n],self.master)
+            pr.Quantity_price = (self.entry_3.get(),self.master)
+            pr.Amount = (self.entry_4.get(),self.master)
+            pr.Date = datetime.today().strftime('%Y-%m-%d')
+            if pr.final_prod_check([pr.Quantity_price,pr.Amount,pr.Date]):
+                DB_Connection.insert_supply(self.master,pr)
+        else:
+            messagebox.showerror(parent=self.master,title='Błąd',message='Podaj dział i nazwę')
