@@ -72,6 +72,16 @@ def select_products():
     cursor.execute("SELECT * FROM Products")
     return cursor.fetchall()
 
+def select_supplies():
+    cursor.execute("""SELECT Data.id_record,Products.name,Data.quantity_price,Data.amount,Products.section FROM Data
+    JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NOT NULL
+    """)
+    return cursor.fetchall()
+
+def delete_product(id):
+    cursor.execute("DELETE FROM Products WHERE id_product=?",(id,))
+    conn.commit()
+
 def check_amount_correctness(obj):
     try:
         cursor.execute("SELECT amount,quantity_price FROM Data")
@@ -104,9 +114,17 @@ def insert_product(obj,prod):
 
 def edit_product(obj,prod,id):
     try:
-        cursor.execute(f"""UPDATE Products SET name='{prod.Name}',netto_price='{prod.Netto_price}',
-        vat_percentage='{prod.Vat_percentage}',section='{prod.Section}' WHERE id_product='{id}'
-        """)
+        cursor.execute(f"""UPDATE Products SET name=?,netto_price=?,
+        vat_percentage=?,section=? WHERE id_product=?
+        """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,id))
+        conn.commit()
+    except Exception as e:
+        messagebox.showerror(parent=obj,title='Błąd',message=e)
+
+def edit_supply(obj,prod,id):
+    try:
+        cursor.execute(f"""UPDATE Data SET quantity_price=?,amount=? WHERE id_record=?
+        """,(prod.Quantity_price,prod.Amount,id))
         conn.commit()
     except Exception as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)
