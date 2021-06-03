@@ -109,10 +109,10 @@ class DB_Setup:
                 if i%2 == 1 and arr[i-1] >= arr[i]:
                     raise E.MinGreaterThanMaxError
             except ValueError:
-                messagebox.showerror('Błąd','Pola przyjmują tylko liczby!')
+                messagebox.showerror(parent=self.master,title='Błąd',message='Pola przyjmują tylko liczby!')
                 return None
             except (E.NegativeValueError,E.MinGreaterThanMaxError) as e:
-                messagebox.showerror('Błąd',e)
+                messagebox.showerror(parent=self.master,title='Błąd',message=e)
                 return None
             i += 1
         return arr

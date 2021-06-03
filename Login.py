@@ -44,37 +44,40 @@ class Login:
 
     def login(self,event):
         import hashlib
-        pary = {}
-        sh = hashlib.sha1()
-        sh.update(self.entry_1.get().encode('utf-8'))
-        hash_value1 = sh.hexdigest()
-        del sh
-        sh = hashlib.sha1()
-        sh.update(self.entry_2.get().encode('utf-8'))
-        hash_value2 = sh.hexdigest()
-        podane = (hash_value1, hash_value2)
-        del sh
-        with open('login.users','r') as f:
-            for linia in f:
-                p = linia.strip().split(' - ')
-                pary[p[0]] = p[1]
-        for i in pary.items():
-            if podane == i:
-                import os.path
-                if not os.path.isfile('database.db'):
-                    import DB_Setup
-                    r = tk.Tk()
-                    db_setup = DB_Setup.DB_Setup(r)
-                    self.master.destroy()
-                    db_setup.run()
+        import os.path
+        if os.path.isfile('login.users'):
+            pary = {}
+            sh = hashlib.sha1()
+            sh.update(self.entry_1.get().encode('utf-8'))
+            hash_value1 = sh.hexdigest()
+            del sh
+            sh = hashlib.sha1()
+            sh.update(self.entry_2.get().encode('utf-8'))
+            hash_value2 = sh.hexdigest()
+            podane = (hash_value1, hash_value2)
+            del sh
+            with open('login.users','r') as f:
+                for linia in f:
+                    p = linia.strip().split(' - ')
+                    pary[p[0]] = p[1]
+            for i in pary.items():
+                if podane == i:
+                    if not os.path.isfile('database.db'):
+                        import DB_Setup
+                        r = tk.Tk()
+                        db_setup = DB_Setup.DB_Setup(r)
+                        self.master.destroy()
+                        db_setup.run()
+                    else:
+                        import main
+                        root = tk.Tk()
+                        app = main.Main(root)
+                        self.master.destroy()
+                        app.run()
                 else:
-                    import main
-                    root = tk.Tk()
-                    app = main.Main(root)
-                    self.master.destroy()
-                    app.run()
-            else:
-                messagebox.showerror('Błąd logowania','Niepoprawne login lub hasło')
+                    messagebox.showerror('Błąd logowania','Niepoprawne login lub hasło')
+        else:
+            messagebox.showerror('Błąd logowania','Brakuje pliku konfiguracyjnego login.users')
 
 
     def run(self):
