@@ -92,12 +92,13 @@ def delete_supply_or_sale(id):
     cursor.execute("DELETE FROM Data WHERE id_record=?",(id,))
     conn.commit()
 
-def check_amount_correctness(obj):
+def check_amount_correctness(obj,amount):
     try:
         cursor.execute("SELECT amount,quantity_price FROM Data")
         result = 0
         for elem in cursor.fetchall():
             result += elem[0] if elem[1] is not None else -elem[0]
+        result -= amount
         if result >= 0:
             return True
         raise E.SaleGreaterThenCurrentAmount

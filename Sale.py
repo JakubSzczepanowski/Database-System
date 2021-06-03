@@ -65,7 +65,7 @@ class Sale:
             pr.Section = (self.combobox_1['values'][s],self.master)
             pr.Name = (self.combobox_2['values'][n],self.master)
             pr.Amount = (self.entry_1.get(),self.master)
-            if DB_Connection.check_amount_correctness(self.master):
+            if DB_Connection.check_amount_correctness(self.master,pr.Amount):
                 pr.Date = datetime.today().strftime('%Y-%m-%d')
                 if pr.final_prod_check([pr.Amount,pr.Date]):
                     DB_Connection.insert_sale(self.master,pr)
