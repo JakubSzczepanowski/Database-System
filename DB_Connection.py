@@ -55,7 +55,7 @@ def get_settings():
     return cursor.fetchall()[0]
 
 def get_sections():
-    cursor.execute("SELECT section FROM Products")
+    cursor.execute("SELECT DISTINCT section FROM Products")
     sections = []
     for elem in cursor.fetchall():
         sections.append(elem[0].replace('_',' '))
