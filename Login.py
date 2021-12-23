@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-
+import DB_Connection
 
 class Login:
     def __init__(self, master=None):
@@ -72,13 +72,18 @@ class Login:
                         import main
                         root = tk.Tk()
                         app = main.Main(root)
+                        app.master.protocol("WM_DELETE_WINDOW", lambda arg=app.master: self.close_window(arg))
                         self.master.destroy()
+                        DB_Connection.open_connection()
                         app.run()
                 else:
                     messagebox.showerror('Błąd logowania','Niepoprawne login lub hasło')
         else:
             messagebox.showerror('Błąd logowania','Brakuje pliku konfiguracyjnego login.users')
 
+    def close_window(self, win):
+        DB_Connection.close_connection()
+        win.destroy()
 
     def run(self):
         self.mainwindow.mainloop()

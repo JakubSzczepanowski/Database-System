@@ -78,9 +78,27 @@ def select_supplies():
     """)
     return cursor.fetchall()
 
+def select_supplies_for_specific_product(name):
+    cursor.execute(f"""SELECT Data.date,Data.amount FROM Data
+    JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NOT NULL AND Products.name='{name}'
+    """)
+    return cursor.fetchall()
+
 def select_sales():
     cursor.execute("""SELECT Data.id_record,Data.date,Products.name,Data.amount,Products.section FROM Data
     JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL
+    """)
+    return cursor.fetchall()
+
+def select_sales_for_specific_product(name):
+    cursor.execute(f"""SELECT Data.date,Data.amount FROM Data
+    JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL AND Products.name='{name}'
+    """)
+    return cursor.fetchall()
+
+def select_amount_and_date_for_specific_product(name):
+    cursor.execute(f"""SELECT Data.date,Data.amount, Data.quantity_price FROM Data
+    JOIN Products ON Data.id_product=Products.id_product WHERE Products.name='{name}'
     """)
     return cursor.fetchall()
 
