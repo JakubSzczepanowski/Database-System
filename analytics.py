@@ -44,6 +44,11 @@ def extract_time_domain_and_amount_range(data):
     amounts = list(map(int, data[:,1]))
     return (dates, amounts)
 
+def extract_timestamp_domain_and_amount_range(data):
+    dates = list(map(lambda date: datetime.strptime(date, '%Y-%m-%d').timestamp(), data[:,0]))
+    amounts = list(map(int, data[:,1]))
+    return (dates, amounts)
+
 def cumulate_dates(X,Y,Z):
     pointer = (0, X[0])
     same = []; i = 0
@@ -77,10 +82,55 @@ def transform_specific_dates(X, Y, Z, same):
         del Y[i]
         del Z[i]
 
+def predict_supply(name):
+    lista = DB_Connection.select_amount_and_date_for_specific_product(name)
+    if len(lista) == 0: raise IndexError
+
+    lista = np.array(lista)
+    X, Y = extract_timestamp_domain_and_amount_range(lista)
+    Z = list(map(lambda item: False if item is None else True, lista[:,2]))
+    cumulate_dates(X, Y, Z)
+    cumulate = 0
+    for i in range(len(Y)):
+        cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
+        Y[i] = cumulate
+
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LinearRegression
+    
+    X, Y = np.array(X).reshape(-1,1), np.array(Y)
+    sca = StandardScaler().fit(X)
+    print(X,Y)
+    X_scale = sca.transform(X)
+    lin_reg = LinearRegression()
+    lin_reg.fit(X_scale, Y)
+    print('coef', lin_reg.coef_)
+    print('intercept', lin_reg.intercept_)
+    x = np.arange(X_scale[0], X_scale[-1])
+    y = x*lin_reg.coef_+lin_reg.intercept_
+    print(X_scale,Y)
+    when_empty = sca.inverse_transform(-lin_reg.intercept_/lin_reg.coef_)
+    print(when_empty)
+    print(datetime.fromtimestamp(*when_empty))
+    # plt.plot(X_scale,Y)
+    # plt.plot(x,y)
+    # plt.show()
+
 
 DB_Connection.open_connection()
-lista = DB_Connection.select_amount_and_date_for_specific_product('Spodnie')
-show_plot(lista, True)
+predict_supply('Spodnie')
+DB_Connection.close_connection()
+# from sklearn.linear_model import LinearRegression
+# lin_reg = LinearRegression()
+# X = np.array([[1],[2],[3],[4],[5]])
+# y = np.dot(X, np. array([2])) + 3.
+# print(y)
+# lin_reg.fit(X, y)
+# print('coef', lin_reg.coef_)
+# print('intercept', lin_reg.intercept_)
+
+# lista = DB_Connection.select_amount_and_date_for_specific_product('Spodnie')
+# show_plot(lista, True)
 # print(lista)
 # lista = np.array(lista)
 # X, Y = extract_time_domain_and_amount_range(lista)
@@ -89,4 +139,3 @@ show_plot(lista, True)
 # cumulate_dates2(X, Y, Z)
 # print(X)
 # print(Y)
-DB_Connection.close_connection()
