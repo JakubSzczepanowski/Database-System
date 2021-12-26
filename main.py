@@ -13,8 +13,9 @@ class Main:
         self.label_1.pack(padx='3', pady='3', side='top')
         self.labelframe_1 = ttk.Labelframe(self.frame_1)
         self.button_1 = ttk.Button(self.labelframe_1)
-        self.button_1.configure(text='Analizuj dane sprzedaży')
+        self.button_1.configure(text='Wizualizuj dane sprzedaży')
         self.button_1.pack(fill='x', ipady='5', padx='3', pady='3', side='top')
+        self.button_1.bind('<Button>', self.open_visualisation)
         self.button_2 = ttk.Button(self.labelframe_1)
         self.button_2.configure(text='Pokaż dane sprzedaży towaru')
         self.button_2.pack(fill='x', ipady='5', padx='3', side='top')
@@ -57,13 +58,12 @@ class Main:
         x = self.master.winfo_screenwidth() // 2 - 514 // 2 - 10
         y = self.master.winfo_screenheight() // 2 - 309 // 2 - 10
         self.master.geometry(f'+{x}+{y}')
-        self.master.attributes("-topmost", True)
+        #self.master.attributes("-topmost", True)
 
     def open_sale(self,event):
         import Sale
         dlg = tk.Toplevel(self.master)
         dialog = Sale.Sale(dlg)
-        DB_Connection.open_connection()
         dialog.fill_combobox1()
         dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg))
         dialog.master.transient(self.master)
@@ -75,7 +75,6 @@ class Main:
         import AddProd
         dlg = tk.Toplevel(self.master)
         dialog = AddProd.AddProd(dlg)
-        DB_Connection.open_connection()
         dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg))
         dialog.master.transient(self.master)
         dialog.master.wait_visibility()
@@ -85,7 +84,6 @@ class Main:
     def open_edit(self,type):
         import Edit
         dlg = tk.Toplevel(self.master)
-        DB_Connection.open_connection()
         dialog = Edit.Edit(dlg,type)
         dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg))
         dialog.master.transient(self.master)
@@ -97,7 +95,6 @@ class Main:
         import Supply
         dlg = tk.Toplevel(self.master)
         dialog = Supply.Supply(dlg)
-        DB_Connection.open_connection()
         dialog.fill_combobox1()
         dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg)) # intercept close button
         dialog.master.transient(self.master)   # dialog window is related to main
@@ -105,10 +102,22 @@ class Main:
         dialog.master.grab_set()        # ensure all input goes to our window
         dialog.master.wait_window()     # block until window is destroyed
 
+    def open_visualisation(self,event):
+        import Visualization
+        # dlg = tk.Toplevel(self.master)
+        r = tk.Tk()
+        dialog = Visualization.Visualization(r)
+        dialog.fill_combobox1()
+        dialog.run()
+        # dialog.master.transient(self.master)
+        # dialog.master.wait_visibility()
+        # dialog.master.grab_set()
+        # dialog.master.wait_window()
+
     def close_dialog(self,dialog):
         dialog.grab_release()
-        DB_Connection.close_connection()
         dialog.destroy()
+
 
     def run(self):
         self.mainwindow.mainloop()
