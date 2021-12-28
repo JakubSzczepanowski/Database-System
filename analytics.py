@@ -3,9 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as dts
 from datetime import datetime
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 
 def show_supply_plot(name):
     lista = DB_Connection.select_supplies_for_specific_product(name)
+    print(lista, name)
     if len(lista) == 0: raise IndexError
     show_plot(lista)
 
@@ -27,9 +30,10 @@ def show_sale_plot(name):
 def show_plot(lista, cumulative=False):
     lista = np.array(lista)
     X, Y = extract_time_domain_and_amount_range(lista)
-    Z = list(map(lambda item: False if item is None else True, lista[:,2]))
-    cumulate_dates(X, Y, Z)
+    
+    #cumulate_dates(X, Y, Z)
     if cumulative:
+        Z = list(map(lambda item: False if item is None else True, lista[:,2]))
         cumulate = 0
         for i in range(len(Y)):
             cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
@@ -84,42 +88,53 @@ def transform_specific_dates(X, Y, Z, same):
 
 def predict_supply(name):
     lista = DB_Connection.select_amount_and_date_for_specific_product(name)
-    if len(lista) == 0: raise IndexError
+    if len(lista) in (0,1): raise IndexError
 
     lista = np.array(lista)
+    cut = 0; index = len(lista)-1
+    while index != 0:
+        if lista[index][2] is not None:
+            cut = index
+            break
+        index -= 1
+    if cut == len(lista)-1:
+        cut = 0
+    lista = lista[cut:]
+    print(lista)
     X, Y = extract_timestamp_domain_and_amount_range(lista)
     Z = list(map(lambda item: False if item is None else True, lista[:,2]))
-    cumulate_dates(X, Y, Z)
+    #cumulate_dates(X, Y, Z)
     cumulate = 0
     for i in range(len(Y)):
         cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
         Y[i] = cumulate
 
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.linear_model import LinearRegression
-    
     X, Y = np.array(X).reshape(-1,1), np.array(Y)
     sca = StandardScaler().fit(X)
-    print(X,Y)
+    #print(X,Y)
     X_scale = sca.transform(X)
     lin_reg = LinearRegression()
     lin_reg.fit(X_scale, Y)
     print('coef', lin_reg.coef_)
     print('intercept', lin_reg.intercept_)
-    x = np.arange(X_scale[0], X_scale[-1])
-    y = x*lin_reg.coef_+lin_reg.intercept_
+    # x = np.arange(X_scale[0], X_scale[-1])
+    # y = x*lin_reg.coef_+lin_reg.intercept_
     print(X_scale,Y)
+    if lin_reg.coef_[0] == 0: raise ZeroDivisionError
     when_empty = sca.inverse_transform(-lin_reg.intercept_/lin_reg.coef_)
-    print(when_empty)
-    print(datetime.fromtimestamp(*when_empty))
+    #print(when_empty)
+    supply_date = datetime.fromtimestamp(*when_empty)
+    if supply_date < datetime.now():
+        return 'Nie potrzebujesz dostawy'
+    return supply_date.date()
     # plt.plot(X_scale,Y)
     # plt.plot(x,y)
     # plt.show()
 
 
-DB_Connection.open_connection()
-predict_supply('Spodnie')
-DB_Connection.close_connection()
+# DB_Connection.open_connection()
+# predict_supply('Spodnie')
+# DB_Connection.close_connection()
 # from sklearn.linear_model import LinearRegression
 # lin_reg = LinearRegression()
 # X = np.array([[1],[2],[3],[4],[5]])

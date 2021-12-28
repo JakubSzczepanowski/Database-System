@@ -72,6 +72,10 @@ def select_products():
     cursor.execute("SELECT * FROM Products")
     return cursor.fetchall()
 
+def select_products_names():
+    cursor.execute("SELECT name FROM Products")
+    return cursor.fetchall()
+
 def select_supplies():
     cursor.execute("""SELECT Data.id_record,Data.date,Products.name,Data.quantity_price,Data.amount,Products.section FROM Data
     JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NOT NULL
