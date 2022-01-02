@@ -87,6 +87,7 @@ class Main:
         import Edit
         dlg = tk.Toplevel(self.master)
         dialog = Edit.Edit(dlg,type)
+        dialog.fill_combobox1()
         dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg))
         dialog.master.transient(self.master)
         dialog.master.wait_visibility()

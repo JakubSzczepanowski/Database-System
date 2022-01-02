@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random as r
 
-produkty = [('Kajak', 1200, 23, 'Sporty wodne'), ('Czepek', 20, 17, 'Sporty wodne'), ('Okularki', 90, 23, 'Sporty wodne'), ('Kąpielówki', 30, 23, 'Sporty wodne'), ('Czepek', 50, 23, 'Sporty wodne'), ('Narty', 4800, 17, 'Sporty zimowe'), ('Kurtka narciarska', 3000, 23, 'Sporty zimowe'), ('Buty skiturowe', 2500, 17, 'Sporty zimowe'), ('Łyżwy', 230, 23, 'Sporty zimowe'), ('Gogle snowboardowe', 70, 23, 'Sporty zimowe'), ('Okulary przeciwsłoneczne', 3000, 23, 'Bieganie'), ('Buty biegowe', 300, 23, 'Bieganie'), ('Plecak do biegania', 150, 23, 'Bieganie'), ('Piłka do koszykówki', 90, 23, 'Sporty drużynowe'), ('Piłka do siatkówki', 100, 23, 'Sporty drużynowe'), ('Nakolanniki', 15, 23, 'Sporty drużynowe'), ('Piłka footballowa', 130, 23, 'Sporty drużynowe')]
+produkty = [('Kajak', 1200, 23, 'Sporty wodne'), ('Czepek', 20, 17, 'Sporty wodne'), ('Okularki', 90, 23, 'Sporty wodne'), ('Kąpielówki', 30, 23, 'Sporty wodne'), ('Narty', 4800, 17, 'Sporty zimowe'), ('Kurtka narciarska', 3000, 23, 'Sporty zimowe'), ('Buty skiturowe', 2500, 17, 'Sporty zimowe'), ('Łyżwy', 230, 23, 'Sporty zimowe'), ('Gogle snowboardowe', 70, 23, 'Sporty zimowe'), ('Okulary przeciwsłoneczne', 3000, 23, 'Bieganie'), ('Buty biegowe', 300, 23, 'Bieganie'), ('Plecak do biegania', 150, 23, 'Bieganie'), ('Piłka do koszykówki', 90, 23, 'Sporty drużynowe'), ('Piłka do siatkówki', 100, 23, 'Sporty drużynowe'), ('Nakolanniki', 15, 23, 'Sporty drużynowe'), ('Piłka footballowa', 130, 23, 'Sporty drużynowe')]
 
 daty = pd.date_range('2021-01-01', periods=365, freq='D')
 
