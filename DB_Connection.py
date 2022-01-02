@@ -72,6 +72,34 @@ def select_products():
     cursor.execute("SELECT * FROM Products")
     return cursor.fetchall()
 
+def select_with_filters(type, params):
+    next_member = False; query_members = []
+    if type == 0: dynamic_query = f"SELECT * FROM Products"
+    elif type == 1: 
+        dynamic_query = """SELECT Data.id_record,Data.date,Products.name,Data.quantity_price,Data.amount,Products.section FROM Data
+        JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NOT NULL
+        """
+        next_member = True
+    else:
+        dynamic_query = """SELECT Data.id_record,Data.date,Products.name,Data.amount,Products.section FROM Data
+        JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL
+        """
+        next_member = True
+    for key, value in params.items():
+        if value:
+            if next_member: dynamic_query += " AND "
+            elif type == 0: dynamic_query += " WHERE "
+            dynamic_query += f"{key} = ?"
+            next_member = True
+            query_members.append(value)
+    print(dynamic_query, query_members)
+    cursor.execute(dynamic_query, query_members)
+    return cursor.fetchall()
+
+def select_products_names():
+    cursor.execute("SELECT name FROM Products")
+    return cursor.fetchall()
+
 def select_supplies():
     cursor.execute("""SELECT Data.id_record,Data.date,Products.name,Data.quantity_price,Data.amount,Products.section FROM Data
     JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NOT NULL
@@ -181,11 +209,16 @@ def insert_supply(obj,prod):
 
 def insert_sale(obj,prod):
     try:
-        cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}'")
-        id_product = cursor.fetchone()[0]
-        cursor.execute("""INSERT INTO Data(quantity_price,amount,date,id_product) 
-        VALUES (null,:amount,:date,:id_product)""",\
-            {'amount':prod.Amount,'date':prod.Date,'id_product':id_product})
+        cursor.execute(f"SELECT id_record, date, amount FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL AND Products.name='{prod.Name}' ORDER BY Data.id_record DESC LIMIT 1")
+        last_supply = cursor.fetchone()
+        if last_supply is not None and last_supply[1] == prod.Date:
+            cursor.execute(f"UPDATE Data SET amount={last_supply[2]+prod.Amount} WHERE id_record = {last_supply[0]}")
+        else:
+            cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}'")
+            id_product = cursor.fetchone()[0]
+            cursor.execute("""INSERT INTO Data(quantity_price,amount,date,id_product) 
+            VALUES (null,:amount,:date,:id_product)""",\
+                {'amount':prod.Amount,'date':prod.Date,'id_product':id_product})
         conn.commit()
     except Exception as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)

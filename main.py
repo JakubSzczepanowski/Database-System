@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import DB_Connection
+from analytics import predict_supply
 
 class Main:
     def __init__(self, master=None):
@@ -22,6 +23,7 @@ class Main:
         self.button_3 = ttk.Button(self.labelframe_1)
         self.button_3.configure(text='Sprawdź czy nie potrzebuję dostawy')
         self.button_3.pack(fill='x', ipady='5', padx='3', pady='3', side='top')
+        self.button_3.bind('<Button>', self.open_predict_supply)
         self.labelframe_1.configure(height='200', text='Analiza danych', width='200')
         self.labelframe_1.pack(expand='true', fill='both', padx='5', pady='5', side='top')
         self.frame_2 = ttk.Frame(self.frame_1)
@@ -85,6 +87,7 @@ class Main:
         import Edit
         dlg = tk.Toplevel(self.master)
         dialog = Edit.Edit(dlg,type)
+        dialog.fill_combobox1()
         dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg))
         dialog.master.transient(self.master)
         dialog.master.wait_visibility()
@@ -113,6 +116,23 @@ class Main:
         # dialog.master.wait_visibility()
         # dialog.master.grab_set()
         # dialog.master.wait_window()
+
+    def open_predict_supply(self, event):
+        import analytics
+        import PredictSupply
+        r = tk.Tk()
+        dialog = PredictSupply.PredictSupply(r)
+        results = ''
+        for name in DB_Connection.select_products_names():
+            try:
+                supply_date = analytics.predict_supply(name[0])
+            except IndexError:
+                supply_date = 'Brak danych'
+            except ZeroDivisionError:
+                supply_date = 'Nie potrzebujesz dostawy'
+            results += f'{name[0]}: {supply_date}\n'
+        dialog.label_2['text'] = results
+        dialog.run()
 
     def close_dialog(self,dialog):
         dialog.grab_release()

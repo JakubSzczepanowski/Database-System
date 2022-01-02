@@ -3,9 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as dts
 from datetime import datetime
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 
 def show_supply_plot(name):
     lista = DB_Connection.select_supplies_for_specific_product(name)
+    print(lista, name, len(lista))
     if len(lista) == 0: raise IndexError
     show_plot(lista)
 
@@ -27,10 +30,10 @@ def show_sale_plot(name):
 def show_plot(lista, cumulative=False):
     lista = np.array(lista)
     X, Y = extract_time_domain_and_amount_range(lista)
-    Z = list(map(lambda item: False if item is None else True, lista[:,2]))
-    cumulate_dates(X, Y, Z)
+    cumulate_supply_dates(X, Y)
     if cumulative:
         cumulate = 0
+        Z = list(map(lambda item: False if item is None else True, lista[:,2]))
         for i in range(len(Y)):
             cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
             Y[i] = cumulate
@@ -44,7 +47,12 @@ def extract_time_domain_and_amount_range(data):
     amounts = list(map(int, data[:,1]))
     return (dates, amounts)
 
-def cumulate_dates(X,Y,Z):
+def extract_timestamp_domain_and_amount_range(data):
+    dates = list(map(lambda date: datetime.strptime(date, '%Y-%m-%d').timestamp(), data[:,0]))
+    amounts = list(map(int, data[:,1]))
+    return (dates, amounts)
+
+def cumulate_supply_dates(X,Y):
     pointer = (0, X[0])
     same = []; i = 0
     while i != len(X)-1:
@@ -55,32 +63,87 @@ def cumulate_dates(X,Y,Z):
             same.append(i)
         else:
             if len(same) != 0:
-                transform_specific_dates(X, Y, Z, same)
+                transform_specific_dates(X, Y, same)
                 i -= len(same)
                 same.clear()
             pointer = (i, X[i])
         if i == len(X)-1 and len(same) != 0:
-            transform_specific_dates(X, Y, Z, same)
+            transform_specific_dates(X, Y, same)
             i -= len(same)
             same.clear()
 
-def transform_specific_dates(X, Y, Z, same):
+def transform_specific_dates(X, Y, same):
     new_value = 0
     for i in same:
-        print(Y[i],Z[i])
-        new_value += Y[i] if Z[i] else -Y[i]
+        print(Y[i])
+        new_value += Y[i]
         print(new_value)
     Y[same[0]] = new_value
     del same[0]
     for i in same:
         del X[i]
         del Y[i]
-        del Z[i]
+
+def predict_supply(name):
+    lista = DB_Connection.select_amount_and_date_for_specific_product(name)
+    
+    lista = np.array(lista)
+    cut = 0; index = len(lista)-1
+    while index != 0:
+        if lista[index][2] is not None:
+            cut = index
+            break
+        index -= 1
+    lista = lista[cut:]
+    if len(lista) in (0,1): raise IndexError
+    print(lista)
+    X, Y = extract_timestamp_domain_and_amount_range(lista)
+    Z = list(map(lambda item: False if item is None else True, lista[:,2]))
+    cumulate_supply_dates(X, Y)
+    cumulate = 0
+    for i in range(len(Y)):
+        cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
+        Y[i] = cumulate
+
+    X, Y = np.array(X).reshape(-1,1), np.array(Y)
+    sca = StandardScaler().fit(X)
+    #print(X,Y)
+    X_scale = sca.transform(X)
+    lin_reg = LinearRegression()
+    lin_reg.fit(X_scale, Y)
+    print('coef', lin_reg.coef_)
+    print('intercept', lin_reg.intercept_)
+    # x = np.arange(X_scale[0], X_scale[-1])
+    # y = x*lin_reg.coef_+lin_reg.intercept_
+    print(X_scale,Y)
+    if lin_reg.coef_[0] == 0: raise ZeroDivisionError
+    when_empty = sca.inverse_transform(-lin_reg.intercept_/lin_reg.coef_)
+    #print(when_empty)
+    supply_date = datetime.fromtimestamp(*when_empty)
+    if supply_date < datetime.now() and lin_reg.coef_[0] > 0:
+        return 'Nie potrzebujesz dostawy'
+    elif supply_date < datetime.now() and lin_reg.coef_[0] < 0:
+        return 'Potrzebujesz dostawy'
+    return supply_date.date()
+    # plt.plot(X_scale,Y)
+    # plt.plot(x,y)
+    # plt.show()
 
 
-DB_Connection.open_connection()
-lista = DB_Connection.select_amount_and_date_for_specific_product('Spodnie')
-show_plot(lista, True)
+# DB_Connection.open_connection()
+# predict_supply('Spodnie')
+# DB_Connection.close_connection()
+# from sklearn.linear_model import LinearRegression
+# lin_reg = LinearRegression()
+# X = np.array([[1],[2],[3],[4],[5]])
+# y = np.dot(X, np. array([2])) + 3.
+# print(y)
+# lin_reg.fit(X, y)
+# print('coef', lin_reg.coef_)
+# print('intercept', lin_reg.intercept_)
+
+# lista = DB_Connection.select_amount_and_date_for_specific_product('Spodnie')
+# show_plot(lista, True)
 # print(lista)
 # lista = np.array(lista)
 # X, Y = extract_time_domain_and_amount_range(lista)
@@ -89,4 +152,3 @@ show_plot(lista, True)
 # cumulate_dates2(X, Y, Z)
 # print(X)
 # print(Y)
-DB_Connection.close_connection()

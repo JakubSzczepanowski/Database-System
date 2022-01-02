@@ -1,8 +1,9 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter.constants import END
+from tkinter.constants import DISABLED, END
 import DB_Connection
 from tkinter import messagebox
+from tkcalendar import DateEntry
 
 class Edit:
     def __init__(self, master,type):
@@ -10,19 +11,99 @@ class Edit:
         self.master = master
         self.type = type
         self.frame_1 = ttk.Frame(self.master)
-        self.treeview_1 = ttk.Treeview(self.frame_1)
-        self.treeview_1.pack(side='top')
+        self.frame_4 = ttk.Frame(self.frame_1)
+        self.treeview_1 = ttk.Treeview(self.frame_4)
+        self.treeview_1.pack(side='left')
+        self.frame_4.configure(height='200', width='200')
+        self.frame_4.pack(expand='true', fill='x', padx='10', pady='10', side='top')
+
+        self.frame_5 = ttk.Frame(self.frame_4)
+        self.label_1 = ttk.Label(self.frame_5)
+        self.label_1.configure(text='Dział', width='15')
+        self.label_1.pack(padx='5', pady='5', side='left')
+        self.combobox_1 = ttk.Combobox(self.frame_5,state="readonly")
+        self.combobox_1.pack(expand='true', fill='x', side='left')
+        self.combobox_1.bind('<<ComboboxSelected>>',self.fill_combobox2)
+        self.frame_5.configure(height='200', width='200')
+        self.frame_5.pack(expand='true', fill='x', side='top')
+        self.frame_6 = ttk.Frame(self.frame_4)
+        self.label_2 = ttk.Label(self.frame_6)
+        self.label_2.configure(text='Nazwa', width='15')
+        self.label_2.pack(padx='5', pady='5', side='left')
+        self.combobox_2 = ttk.Combobox(self.frame_6,state="readonly")
+        self.combobox_2.pack(expand='true', fill='x', side='left')
+        self.frame_6.configure(height='200', width='200')
+        self.frame_6.pack(expand='true', fill='x', side='top')
+
+        self.frame_7 = ttk.Frame(self.frame_4)
+        self.label_3 = ttk.Label(self.frame_7)
+        self.label_3.configure(text='Cena hurtowa', width='15')
+        self.label_3.pack(padx='3', pady='3', side='left')
+        self.entry_5 = ttk.Entry(self.frame_7)
+        self.entry_5.pack(expand='true', fill='x', side='left')
+        self.frame_7.configure(height='200', width='200')
+        self.frame_7.pack(expand='true', fill='x', side='top')
+
+        self.frame_8 = ttk.Frame(self.frame_4)
+        self.label_4 = ttk.Label(self.frame_8)
+        self.label_4.configure(text='Ilość', width='15')
+        self.label_4.pack(padx='3', pady='3', side='left')
+        self.entry_6 = ttk.Entry(self.frame_8)
+        self.entry_6.pack(expand='true', fill='x', side='left')
+        self.frame_8.configure(height='200', width='200')
+        self.frame_8.pack(expand='true', fill='x', side='top')
+
+        self.frame_9 = ttk.Frame(self.frame_4)
+        self.label_5 = ttk.Label(self.frame_9)
+        self.label_5.configure(text='Cena netto', width='15')
+        self.label_5.pack(padx='3', pady='3', side='left')
+        self.entry_7 = ttk.Entry(self.frame_9)
+        self.entry_7.pack(expand='true', fill='x', side='left')
+        self.frame_9.configure(height='200', width='200')
+        self.frame_9.pack(expand='true', fill='x', side='top')
+
+        self.frame_10 = ttk.Frame(self.frame_4)
+        self.label_6 = ttk.Label(self.frame_10)
+        self.label_6.configure(text='Procent VAT', width='15')
+        self.label_6.pack(padx='3', pady='3', side='left')
+        self.entry_8 = ttk.Entry(self.frame_10)
+        self.entry_8.pack(expand='true', fill='x', side='left')
+        self.frame_10.configure(height='200', width='200')
+        self.frame_10.pack(expand='true', fill='x', side='top')
+
+        self.frame_11 = ttk.Frame(self.frame_4)
+        self.label_7 = ttk.Label(self.frame_11)
+        self.label_7.configure(text='Data', width='15')
+        self.label_7.pack(padx='3', pady='3', side='left')
+        self.dateEntry = DateEntry(self.frame_11, width=12, background='darkblue',locale="pl_PL",date_pattern="yyyy-mm-dd", foreground='white', borderwidth=2)
+        self.dateEntry.delete(0,END)
+        self.dateEntry.pack(expand='true', fill='x', side='left')
+        self.frame_11.configure(height='200', width='200')
+        self.frame_11.pack(expand='true', fill='x', side='top')
+
+        self.frame_12 = ttk.Frame(self.frame_4)
+        self.button_3 = ttk.Button(self.frame_12)
+        self.button_3.configure(text='Filtruj')
+        self.button_3.bind('<Button>', self.filter)
+        self.button_3.pack(expand='true', fill='x', side='left')
+        self.button_4 = ttk.Button(self.frame_12)
+        self.button_4.configure(text='Wyczyść')
+        self.button_4.bind('<Button>', self.clear)
+        self.button_4.pack(expand='true', fill='x', side='left')
+        self.frame_12.configure(height='200', width='200')
+        self.frame_12.pack(expand='true', fill='x', side='top', padx='3')
+        
         self.frame_1.configure(height='200', width='200')
         self.frame_1.pack(side='top')
         self.id = None
         if self.type == 0:
             self.treeview_1['columns'] = ('ID','Nazwa','Cena netto','Procent VAT','Dział')
             self.treeview_1.column("#0", width=0)
-            self.treeview_1.column('ID', width=100)
-            self.treeview_1.column('Nazwa', width=100)
-            self.treeview_1.column('Cena netto', width=100)
-            self.treeview_1.column('Procent VAT', width=100)
-            self.treeview_1.column('Dział', width=100)
+            self.treeview_1.column('ID', width=30)
+            self.treeview_1.column('Nazwa', width=130)
+            self.treeview_1.column('Cena netto', width=80)
+            self.treeview_1.column('Procent VAT', width=80)
+            self.treeview_1.column('Dział', width=150)
             self.treeview_1.heading("#0", text='', anchor="w")
             self.treeview_1.heading('ID', text='ID')
             self.treeview_1.heading('Nazwa', text='Nazwa')
@@ -31,6 +112,10 @@ class Edit:
             self.treeview_1.heading('Dział', text='Dział')
             self.add_items(DB_Connection.select_products())
             self.treeview_1.bind('<<TreeviewSelect>>', self.on_select_products)
+
+            self.entry_5.config(state='disabled')
+            self.entry_6.config(state='disabled')
+            self.dateEntry.config(state='disabled')
 
             self.frame_2 = ttk.Frame(self.frame_1)
             self.entry_1 = ttk.Entry(self.frame_2)
@@ -47,12 +132,12 @@ class Edit:
         elif self.type == 1:
             self.treeview_1['columns'] = ('ID','Data','Nazwa','Cena hurtowa','Ilość','Dział')
             self.treeview_1.column("#0", width=0)
-            self.treeview_1.column('ID', width=100)
-            self.treeview_1.column('Data', width=100)
-            self.treeview_1.column('Nazwa', width=100)
+            self.treeview_1.column('ID', width=30)
+            self.treeview_1.column('Data', width=80)
+            self.treeview_1.column('Nazwa', width=130)
             self.treeview_1.column('Cena hurtowa', width=100)
-            self.treeview_1.column('Ilość', width=100)
-            self.treeview_1.column('Dział', width=100)
+            self.treeview_1.column('Ilość', width=80)
+            self.treeview_1.column('Dział', width=150)
             self.treeview_1.heading("#0", text='', anchor="w")
             self.treeview_1.heading('ID', text='ID')
             self.treeview_1.heading('Data', text='Data')
@@ -62,6 +147,9 @@ class Edit:
             self.treeview_1.heading('Dział', text='Dział')
             self.add_items(DB_Connection.select_supplies())
             self.treeview_1.bind('<<TreeviewSelect>>', self.on_select_supplies)
+
+            self.entry_7.config(state='disabled')
+            self.entry_8.config(state='disabled')
 
             self.frame_2 = ttk.Frame(self.frame_1)
             self.entry_1 = ttk.Entry(self.frame_2)
@@ -74,11 +162,11 @@ class Edit:
         elif self.type == 2:
             self.treeview_1['columns'] = ('ID','Data','Nazwa','Ilość','Dział')
             self.treeview_1.column("#0", width=0)
-            self.treeview_1.column('ID', width=100)
-            self.treeview_1.column('Data', width=100)
-            self.treeview_1.column('Nazwa', width=100)
-            self.treeview_1.column('Ilość', width=100)
-            self.treeview_1.column('Dział', width=100)
+            self.treeview_1.column('ID', width=30)
+            self.treeview_1.column('Data', width=80)
+            self.treeview_1.column('Nazwa', width=130)
+            self.treeview_1.column('Ilość', width=80)
+            self.treeview_1.column('Dział', width=150)
             self.treeview_1.heading("#0", text='', anchor="w")
             self.treeview_1.heading('ID', text='ID')
             self.treeview_1.heading('Data', text='Data')
@@ -87,6 +175,10 @@ class Edit:
             self.treeview_1.heading('Dział', text='Dział')
             self.add_items(DB_Connection.select_sales())
             self.treeview_1.bind('<<TreeviewSelect>>', self.on_select_sales)
+
+            self.entry_5.config(state='disabled')
+            self.entry_7.config(state='disabled')
+            self.entry_8.config(state='disabled')
 
             self.frame_2 = ttk.Frame(self.frame_1)
             self.entry_1 = ttk.Entry(self.frame_2)
@@ -111,15 +203,40 @@ class Edit:
         # Main widget
         self.mainwindow = self.frame_1
         if self.type == 0:
-            a,b = 600,349
+            a,b = 720,349
         elif self.type == 1:
-            a,b = 619,346
+            a,b = 839,346
         else:
-            a,b = 519,346
+            a,b = 739,346
         x = self.master.winfo_screenwidth() // 2 - a // 2 - 10
         y = self.master.winfo_screenheight() // 2 - b // 2 - 10
         self.master.geometry(f'+{x}+{y}')
         self.master.title('Edytuj')
+
+    def fill_combobox1(self):
+        self.combobox_1['values'] = DB_Connection.get_sections()
+
+    def fill_combobox2(self,event):
+        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
+
+    def filter(self, event):
+        params = {}
+        params['Products.section'], params['Products.name'], params['Data.quantity_price'], params['Data.amount'], params['Products.netto_price'], params['Products.vat_percentage'], params['Data.date'] = \
+            self.combobox_1.get(), self.combobox_2.get(), self.entry_5.get(), self.entry_6.get(), self.entry_7.get(), self.entry_8.get(), self.dateEntry.get_date().strftime('%Y-%m-%d') if self.dateEntry._validate_date() else ""
+        print(params)
+        filtered_grid = DB_Connection.select_with_filters(self.type, params)
+        print(filtered_grid)
+        self.treeview_1.delete(*self.treeview_1.get_children())
+        self.add_items(filtered_grid)
+
+    def clear(self, event):
+        self.combobox_1.set('')
+        self.combobox_2.set('')
+        self.entry_5.delete(0, END)
+        self.entry_6.delete(0, END)
+        self.entry_7.delete(0, END)
+        self.entry_8.delete(0, END)
+        self.dateEntry.delete(0, END)
 
     def add_items(self,records):
         for r in records:
@@ -201,3 +318,4 @@ class Edit:
 
     def run(self):
         self.mainwindow.mainloop()
+
