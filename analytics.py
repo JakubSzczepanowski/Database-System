@@ -2,7 +2,7 @@ import DB_Connection
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as dts
-from datetime import datetime
+from datetime import datetime, timedelta
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 
@@ -84,27 +84,47 @@ def transform_specific_dates(X, Y, same):
         del X[i]
         del Y[i]
 
-def predict_supply(name):
+def predict_resume(name):
     lista = DB_Connection.select_amount_and_date_for_specific_product(name)
     
     lista = np.array(lista)
-    cut = 0; index = len(lista)-1
+    cut = 0; index = len(lista)-1; cut2 = 0
     while index != 0:
         if lista[index][2] is not None:
-            cut = index
-            break
+            if cut == 0: cut = index
+            elif cut2 == 0: 
+                cut2 = index
+                break
         index -= 1
+    
+    lista_backup = lista.copy()
     lista = lista[cut:]
     if len(lista) in (0,1): raise IndexError
-    print(lista)
+    days_range = (datetime.strptime(lista[-1,0], '%Y-%m-%d')-datetime.strptime(lista[0,0], '%Y-%m-%d')).days
+    print(lista, days_range)
     X, Y = extract_timestamp_domain_and_amount_range(lista)
-    Z = list(map(lambda item: False if item is None else True, lista[:,2]))
     cumulate_supply_dates(X, Y)
-    cumulate = 0
+    cumulate = 0; counter = 0
     for i in range(len(Y)):
-        cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
+        if i == 0:
+            cumulate += Y[i]
+        else:
+            cumulate -= Y[i]; counter += 1
         Y[i] = cumulate
 
+    sale_for_day = (Y[0]-Y[-1])/days_range
+    sale_ratio = 'Brakuje danych'
+    if cut2 < cut:
+        old_sale = lista_backup[cut2:cut]
+        print(cut2, cut, 'aaaaaaaaaaaaaaa')
+        old_amounts = list(map(int, old_sale[:,1]))
+        old_days_range = (datetime.strptime(old_sale[-1,0], '%Y-%m-%d')-datetime.strptime(old_sale[0,0], '%Y-%m-%d')).days
+        old_sale_for_day = (old_amounts[0]-old_amounts[-1])/old_days_range
+        print(old_sale_for_day, 'stara sprzedaż na dzień')
+        sale_ratio = sale_for_day/old_sale_for_day*100
+        print(f'nowa sprzedaż dzienna stanowi {sale_ratio} procent')
+    
+    print(days_range, 'ilość dni')
     X, Y = np.array(X).reshape(-1,1), np.array(Y)
     sca = StandardScaler().fit(X)
     #print(X,Y)
@@ -118,13 +138,19 @@ def predict_supply(name):
     print(X_scale,Y)
     if lin_reg.coef_[0] == 0: raise ZeroDivisionError
     when_empty = sca.inverse_transform(-lin_reg.intercept_/lin_reg.coef_)
+    print(when_empty, '\n')
+    
     #print(when_empty)
+    #print(StandardScaler().fit(Y.reshape(-1,1)).transform([lin_reg.coef_]), 'znormalizowany współczynnik')
+
+    #print((lin_reg.coef_-Y[-1])/(Y[0]-Y[-1]), 'znormalizowany współczynnik')
     supply_date = datetime.fromtimestamp(*when_empty)
     if supply_date < datetime.now() and lin_reg.coef_[0] > 0:
-        return 'Nie potrzebujesz dostawy'
-    elif supply_date < datetime.now() and lin_reg.coef_[0] < 0:
-        return 'Potrzebujesz dostawy'
-    return supply_date.date()
+        return (name, 'Nie potrzebujesz dostawy', sale_ratio, sale_for_day)
+    elif supply_date < datetime.now() and lin_reg.coef_[0] < 0: # jak ostatnia sprzedaż była dawno to przewiduje przed now i mówi o dostawie
+        new_date = datetime.now()+timedelta(days=int(Y[-1]/sale_for_day))
+        return (name, 'Potrzebujesz dostawy' if new_date <= datetime.now() else new_date.date(), sale_ratio, sale_for_day)
+    return (name, supply_date.date(), sale_ratio, sale_for_day)
     # plt.plot(X_scale,Y)
     # plt.plot(x,y)
     # plt.show()

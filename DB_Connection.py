@@ -29,7 +29,8 @@ def create_settings_table(obj,data):
         name text,
         netto_price real,
         vat_percentage integer,
-        section text
+        section text,
+        season text
         )""")
 
         cursor.execute("""CREATE TABLE Data (
@@ -72,6 +73,10 @@ def select_products():
     cursor.execute("SELECT * FROM Products")
     return cursor.fetchall()
 
+def select_seasonal_products(season):
+    cursor.execute(f"SELECT name,section FROM Products WHERE season = '{season}'")
+    return cursor.fetchall()
+
 def select_with_filters(type, params):
     next_member = False; query_members = []
     if type == 0: dynamic_query = f"SELECT * FROM Products"
@@ -87,6 +92,7 @@ def select_with_filters(type, params):
         next_member = True
     for key, value in params.items():
         if value:
+            if value == 'Całoroczne': value = ''
             if next_member: dynamic_query += " AND "
             elif type == 0: dynamic_query += " WHERE "
             dynamic_query += f"{key} = ?"
@@ -158,9 +164,9 @@ def insert_product(obj,prod):
         for elem in cursor.fetchall():
             if elem[0] == prod.Name:
                 raise E.NameInThatSectionExistError
-        cursor.execute(f"""INSERT INTO Products (name,netto_price,vat_percentage,section) 
-        VALUES (:name,:netto_price,:vat_percentage,:section)""",\
-            {'name':prod.Name,'netto_price':prod.Netto_price,'vat_percentage':prod.Vat_percentage,'section':prod.Section})
+        cursor.execute(f"""INSERT INTO Products (name,netto_price,vat_percentage,section,season) 
+        VALUES (:name,:netto_price,:vat_percentage,:section,:season)""",\
+            {'name':prod.Name,'netto_price':prod.Netto_price,'vat_percentage':prod.Vat_percentage,'section':prod.Section,'season':prod.Season})
         conn.commit()
     except E.NameInThatSectionExistError as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)
@@ -172,8 +178,8 @@ def insert_product(obj,prod):
 def edit_product(obj,prod,id):
     try:
         cursor.execute(f"""UPDATE Products SET name=?,netto_price=?,
-        vat_percentage=?,section=? WHERE id_product=?
-        """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,id))
+        vat_percentage=?,section=?,season=? WHERE id_product=?
+        """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,prod.Season,id))
         conn.commit()
     except Exception as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)

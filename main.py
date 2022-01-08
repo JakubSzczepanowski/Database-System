@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import DB_Connection
-from analytics import predict_supply
+from analytics import predict_resume
 
 class Main:
     def __init__(self, master=None):
@@ -18,10 +18,11 @@ class Main:
         self.button_1.pack(fill='x', ipady='5', padx='3', pady='3', side='top')
         self.button_1.bind('<Button>', self.open_visualisation)
         self.button_2 = ttk.Button(self.labelframe_1)
-        self.button_2.configure(text='Pokaż dane sprzedaży towaru')
+        self.button_2.configure(text='Pokaż sezonowe produkty')
         self.button_2.pack(fill='x', ipady='5', padx='3', side='top')
+        self.button_2.bind('<Button>', self.open_seasonal_result)
         self.button_3 = ttk.Button(self.labelframe_1)
-        self.button_3.configure(text='Sprawdź czy nie potrzebuję dostawy')
+        self.button_3.configure(text='Analizuj sprzedaż')
         self.button_3.pack(fill='x', ipady='5', padx='3', pady='3', side='top')
         self.button_3.bind('<Button>', self.open_predict_supply)
         self.labelframe_1.configure(height='200', text='Analiza danych', width='200')
@@ -118,20 +119,25 @@ class Main:
         # dialog.master.wait_window()
 
     def open_predict_supply(self, event):
-        import analytics
-        import PredictSupply
+        import PredictResume
         r = tk.Tk()
-        dialog = PredictSupply.PredictSupply(r)
-        results = ''
+        dialog = PredictResume.PredictResume(r)
         for name in DB_Connection.select_products_names():
             try:
-                supply_date = analytics.predict_supply(name[0])
+                print(name)
+                resume = predict_resume(name[0])
             except IndexError:
-                supply_date = 'Brak danych'
+                resume = (name[0], 'Brak danych', 'Brak danych', 'Brak danych')
             except ZeroDivisionError:
-                supply_date = 'Nie potrzebujesz dostawy'
-            results += f'{name[0]}: {supply_date}\n'
-        dialog.label_2['text'] = results
+                resume = (name[0], 'Nie potrzebujesz dostawy', 'Większa obniżka', 0)
+            dialog.add_item(resume)
+        dialog.run()
+
+    def open_seasonal_result(self, event):
+        import SeasonalResume
+        r = tk.Tk()
+        dialog = SeasonalResume.SeasonalResume(r)
+        dialog.get_seasonal_products()
         dialog.run()
 
     def close_dialog(self,dialog):
