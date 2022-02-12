@@ -1,5 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import filedialog
+from tkinter import messagebox
 import DB_Connection
 from analytics import predict_resume
 
@@ -8,6 +10,13 @@ class Main:
         # build ui
         self.master = master
         self.master.title('Panel główny')
+        self.menu = tk.Menu(self.master, tearoff=0)
+        self.database_menu = tk.Menu(self.menu, tearoff=0)
+        self.database_menu.add_command(label='Eksportuj', command=self.export_database)
+        self.database_menu.add_command(label='Importuj', command=self.import_database)
+        self.database_menu.add_command(label='Usuń', command=self.delete_database)
+        self.menu.add_cascade(label='Baza danych', menu=self.database_menu)
+        self.master.config(menu=self.menu)
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
         self.label_1.configure(anchor='w', font='{Arial} 24 {}', takefocus=False, text='Analizator procesu sprzedaży')
@@ -37,7 +46,7 @@ class Main:
         self.button_5.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
         self.button_5.bind('<Button>',self.open_supply)
         self.button_6 = ttk.Button(self.frame_2)
-        self.button_6.configure(text='Raport sprzedaży')
+        self.button_6.configure(text='Sprzedaż')
         self.button_6.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
         self.button_6.bind('<Button>',self.open_sale)
         self.labelframe_2 = ttk.Labelframe(self.frame_2)
@@ -143,6 +152,41 @@ class Main:
     def close_dialog(self,dialog):
         dialog.grab_release()
         dialog.destroy()
+
+    def export_database(self):
+        from datetime import datetime
+        today = datetime.today()
+        default_filename = f'Export {today.date()} {today.hour}-{today.minute}.zip'
+        f = filedialog.asksaveasfile(parent=self.master, defaultextension='.zip', filetypes=(("Archiwum ZIP", "*.zip"),("Wszystkie pliki", "*.*")), initialfile=default_filename)
+        if f is None:
+            return
+        
+        import zipfile, os
+        path = os.path.join(os.path.curdir, 'database.db')
+        archive = zipfile.ZipFile(f.name, 'w')
+        archive.write(path)
+        archive.close()
+        f.close()
+
+    def import_database(self):
+        import os, shutil
+        path = os.path.join(os.path.curdir, 'database.db')
+        if os.path.isfile(path):
+            return messagebox.showerror(parent=self.master,title='Błąd',message='Istnieje już plik bazy danych')
+        f = filedialog.askopenfilename(parent=self.master, defaultextension='.db', filetypes=(("Plik bazy danych", "*.db"),("Wszystkie pliki", "*.*")))
+        if f is None:
+            return
+        shutil.copy(f, os.path.curdir)
+        DB_Connection.open_connection()
+
+    def delete_database(self):
+        import os
+        path = os.path.join(os.path.curdir, 'database.db')
+        if os.path.isfile(path):
+            DB_Connection.close_connection()
+            os.remove(path)
+        else:
+            messagebox.showerror(parent=self.master,title='Błąd',message='Nie znaleziono pliku bazy danych')
 
 
     def run(self):
