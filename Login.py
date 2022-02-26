@@ -46,22 +46,17 @@ class Login:
         import hashlib
         import os.path
         if os.path.isfile('login.users'):
-            pary = {}
-            sh = hashlib.sha1()
+            sh = hashlib.sha3_256()
             sh.update(self.entry_1.get().encode('utf-8'))
-            hash_value1 = sh.hexdigest()
+            hash_value1 = sh.digest()
             del sh
-            sh = hashlib.sha1()
+            sh = hashlib.sha3_256()
             sh.update(self.entry_2.get().encode('utf-8'))
-            hash_value2 = sh.hexdigest()
-            podane = (hash_value1, hash_value2)
+            hash_value2 = sh.digest()
             del sh
-            with open('login.users','r') as f:
-                for linia in f:
-                    p = linia.strip().split(' - ')
-                    pary[p[0]] = p[1]
-            for i in pary.items():
-                if podane == i:
+            with open('login.users','br') as f:
+                content = f.read()
+                if hash_value1 == content[:32] and hash_value2 == content[32:]:
                     if not os.path.isfile('database.db'):
                         import DB_Setup
                         r = tk.Tk()

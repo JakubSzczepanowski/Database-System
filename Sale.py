@@ -2,7 +2,6 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 import DB_Connection
-import Exceptions as E
 
 
 class Sale:
@@ -54,7 +53,7 @@ class Sale:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
-        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
+        self.combobox_2['values'] = DB_Connection.get_products_for_section(self.combobox_1['values'][self.combobox_1.current()])
 
     def add_sale(self,event):
         s,n = self.combobox_1.current(),self.combobox_2.current()

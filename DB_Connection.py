@@ -24,7 +24,7 @@ def create_settings_table(obj,data):
             netto_price_max integer
         )""")
 
-        cursor.execute(f"""CREATE TABLE Products (
+        cursor.execute("""CREATE TABLE Products (
         id_product integer PRIMARY KEY,
         name text,
         netto_price real,
@@ -62,7 +62,7 @@ def get_sections():
         sections.append(elem[0].replace('_',' '))
     return sections
 
-def get_products(section):
+def get_products_for_section(section):
     cursor.execute(f"SELECT name FROM Products WHERE section='{section}'")
     products = []
     for elem in cursor.fetchall():
@@ -220,7 +220,7 @@ def insert_sale(obj,prod):
         if last_supply is not None and last_supply[1] == prod.Date:
             cursor.execute(f"UPDATE Data SET amount={last_supply[2]+prod.Amount} WHERE id_record = {last_supply[0]}")
         else:
-            cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}'")
+            cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}' AND section='{prod.Section}'")
             id_product = cursor.fetchone()[0]
             cursor.execute("""INSERT INTO Data(quantity_price,amount,date,id_product) 
             VALUES (null,:amount,:date,:id_product)""",\

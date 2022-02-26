@@ -33,7 +33,7 @@ class Main:
         self.button_3 = ttk.Button(self.labelframe_1)
         self.button_3.configure(text='Analizuj sprzedaż')
         self.button_3.pack(fill='x', ipady='5', padx='3', pady='3', side='top')
-        self.button_3.bind('<Button>', self.open_predict_supply)
+        self.button_3.bind('<Button>', self.open_predict_resume)
         self.labelframe_1.configure(height='200', text='Analiza danych', width='200')
         self.labelframe_1.pack(expand='true', fill='both', padx='5', pady='5', side='top')
         self.frame_2 = ttk.Frame(self.frame_1)
@@ -127,7 +127,7 @@ class Main:
         # dialog.master.grab_set()
         # dialog.master.wait_window()
 
-    def open_predict_supply(self, event):
+    def open_predict_resume(self, event):
         import PredictResume
         r = tk.Tk()
         dialog = PredictResume.PredictResume(r)
