@@ -132,6 +132,7 @@ class Main:
     #     event_loop.run_until_complete()
     
     def calculate_predicts(self):
+        self.button_3.config(state=tk.DISABLED)
         import PredictResume
         r = tk.Tk()
         dialog = PredictResume.PredictResume(r)
@@ -144,6 +145,7 @@ class Main:
             except ZeroDivisionError:
                 resume = (name[0], 'Nie potrzebujesz dostawy', 'Większa obniżka', 0)
             dialog.add_item(resume)
+        self.button_3.config(state=tk.NORMAL)
         dialog.run()
 
     def open_predict_resume(self, event):
