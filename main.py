@@ -71,6 +71,7 @@ class Main:
         x = self.master.winfo_screenwidth() // 2 - 514 // 2 - 10
         y = self.master.winfo_screenheight() // 2 - 309 // 2 - 10
         self.master.geometry(f'+{x}+{y}')
+        self.master.protocol("WM_DELETE_WINDOW", lambda: self.close_window(self.master))
         #self.master.attributes("-topmost", True)
 
     def open_sale(self,event):
@@ -198,6 +199,9 @@ class Main:
         else:
             messagebox.showerror(parent=self.master,title='Błąd',message='Nie znaleziono pliku bazy danych')
 
+    def close_window(self, win):
+        DB_Connection.close_connection()
+        win.destroy()
 
     def run(self):
         self.mainwindow.mainloop()

@@ -45,7 +45,7 @@ class Login:
     def login(self,event):
         import hashlib
         import os.path
-        if os.path.isfile('login.users'):
+        if os.path.isfile('login.user'):
             sh = hashlib.sha3_256()
             sh.update(self.entry_1.get().encode('utf-8'))
             hash_value1 = sh.digest()
@@ -54,7 +54,7 @@ class Login:
             sh.update(self.entry_2.get().encode('utf-8'))
             hash_value2 = sh.digest()
             del sh
-            with open('login.users','br') as f:
+            with open('login.user','br') as f:
                 content = f.read()
                 if hash_value1 == content[:32] and hash_value2 == content[32:]:
                     if not os.path.isfile('database.db'):
@@ -67,18 +67,14 @@ class Login:
                         import main
                         root = tk.Tk()
                         app = main.Main(root)
-                        app.master.protocol("WM_DELETE_WINDOW", lambda arg=app.master: self.close_window(arg))
                         self.master.destroy()
                         DB_Connection.open_connection()
                         app.run()
                 else:
                     messagebox.showerror('Błąd logowania','Niepoprawne login lub hasło')
         else:
-            messagebox.showerror('Błąd logowania','Brakuje pliku konfiguracyjnego login.users')
+            messagebox.showerror('Błąd logowania','Brakuje pliku konfiguracyjnego login.user')
 
-    def close_window(self, win):
-        DB_Connection.close_connection()
-        win.destroy()
 
     def run(self):
         self.mainwindow.mainloop()

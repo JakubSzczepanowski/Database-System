@@ -90,7 +90,6 @@ class DB_Setup:
             import DB_Connection
             DB_Connection.open_connection()
             DB_Connection.create_settings_table(self.master,settings)
-            DB_Connection.close_connection()
             import main
             root = tk.Tk()
             app = main.Main(root)
