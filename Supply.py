@@ -60,6 +60,7 @@ class Supply:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
+        self.combobox_2.set('')
         self.combobox_2['values'] = DB_Connection.get_products_for_section(self.combobox_1['values'][self.combobox_1.current()])
 
     def add_supply(self,event):

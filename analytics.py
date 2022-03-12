@@ -10,6 +10,7 @@ def show_supply_plot(name):
     lista = DB_Connection.select_supplies_for_specific_product(name)
     print(lista, name, len(lista))
     if len(lista) == 0: raise IndexError
+    plt.title('Wykres dostaw w funkcji czasu')
     show_plot(lista)
 
 def show_cumulative_amount_plot(name):
@@ -19,12 +20,13 @@ def show_cumulative_amount_plot(name):
     # lista.append(('2021-10-20', 100, False))
     # lista.append(('2021-11-24', 200, False))
     if len(lista) == 0: raise IndexError
-    
+    plt.title('Wykres bieżących ilości na stanie w funkcji czasu')
     show_plot(lista, True)
 
 
 def show_sale_plot(name):
     lista = DB_Connection.select_sales_for_specific_product(name)
+    plt.title('Wykres sprzedaży w funkcji czasu')
     show_plot(lista)
 
 def show_plot(lista, cumulative=False):
@@ -39,6 +41,8 @@ def show_plot(lista, cumulative=False):
             Y[i] = cumulate
     print(X, Y)
     dates = dts.date2num(X)
+    plt.xlabel('Czas')
+    plt.ylabel('Ilość')
     plt.plot_date(dates, Y, linestyle='solid')
     plt.show()
 

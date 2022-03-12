@@ -56,25 +56,38 @@ class Visualization:
         self.mainwindow.mainloop()
 
     def show_supplies_in_time(self,event):
-        try:
-            analytics.show_supply_plot(self.combobox_2['values'][self.combobox_2.current()])
-        except IndexError:
-            messagebox.showerror(parent=self.master,title='Błąd',message='Nie można utworzyć wykresu z powodu braku danych')
-
+        s,n = self.combobox_1.current(),self.combobox_2.current()
+        if s != -1 and n != -1:
+            try:
+                analytics.show_supply_plot(self.combobox_2['values'][self.combobox_2.current()])
+            except IndexError:
+                messagebox.showerror(parent=self.master,title='Błąd',message='Nie można utworzyć wykresu z powodu braku danych')
+        else:
+            messagebox.showerror(parent=self.master,title='Błąd',message='Podaj dział i nazwę')
+       
     def show_sales_in_time(self,event):
-        try:
-            analytics.show_sale_plot(self.combobox_2['values'][self.combobox_2.current()])
-        except IndexError:
-            messagebox.showerror(parent=self.master,title='Błąd',message='Nie można utworzyć wykresu z powodu braku danych')
+        s,n = self.combobox_1.current(),self.combobox_2.current()
+        if s != -1 and n != -1:
+            try:
+                analytics.show_sale_plot(self.combobox_2['values'][self.combobox_2.current()])
+            except IndexError:
+                messagebox.showerror(parent=self.master,title='Błąd',message='Nie można utworzyć wykresu z powodu braku danych')
+        else:
+            messagebox.showerror(parent=self.master,title='Błąd',message='Podaj dział i nazwę')
 
     def show_amount_in_time(self, event):
-        try:
-            analytics.show_cumulative_amount_plot(self.combobox_2['values'][self.combobox_2.current()])
-        except IndexError:
-            messagebox.showerror(parent=self.master,title='Błąd',message='Nie można utworzyć wykresu z powodu braku danych')
+        s,n = self.combobox_1.current(),self.combobox_2.current()
+        if s != -1 and n != -1:
+            try:
+                analytics.show_cumulative_amount_plot(self.combobox_2['values'][self.combobox_2.current()])
+            except IndexError:
+                messagebox.showerror(parent=self.master,title='Błąd',message='Nie można utworzyć wykresu z powodu braku danych')
+        else:
+            messagebox.showerror(parent=self.master,title='Błąd',message='Podaj dział i nazwę')
 
     def fill_combobox1(self):
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
+        self.combobox_2.set('')
         self.combobox_2['values'] = DB_Connection.get_products_for_section(self.combobox_1['values'][self.combobox_1.current()])
