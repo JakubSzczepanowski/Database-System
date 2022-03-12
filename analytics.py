@@ -104,12 +104,12 @@ def predict_resume(name):
     print(lista, days_range)
     X, Y = extract_timestamp_domain_and_amount_range(lista)
     cumulate_supply_dates(X, Y)
-    cumulate = 0; counter = 0
+    cumulate = 0
     for i in range(len(Y)):
         if i == 0:
             cumulate += Y[i]
         else:
-            cumulate -= Y[i]; counter += 1
+            cumulate -= Y[i]
         Y[i] = cumulate
 
     sale_for_day = (Y[0]-Y[-1])/days_range
@@ -144,12 +144,13 @@ def predict_resume(name):
     #print(StandardScaler().fit(Y.reshape(-1,1)).transform([lin_reg.coef_]), 'znormalizowany współczynnik')
 
     #print((lin_reg.coef_-Y[-1])/(Y[0]-Y[-1]), 'znormalizowany współczynnik')
+    now = datetime.now()
     supply_date = datetime.fromtimestamp(*when_empty)
-    if supply_date < datetime.now() and lin_reg.coef_[0] > 0:
+    if supply_date < now and lin_reg.coef_[0] > 0:
         return (name, 'Nie potrzebujesz dostawy', sale_ratio, sale_for_day)
-    elif supply_date < datetime.now() and lin_reg.coef_[0] < 0: # jak ostatnia sprzedaż była dawno to przewiduje przed now i mówi o dostawie
-        new_date = datetime.now()+timedelta(days=int(Y[-1]/sale_for_day))
-        return (name, 'Potrzebujesz dostawy' if new_date <= datetime.now() else new_date.date(), sale_ratio, sale_for_day)
+    elif supply_date < now and lin_reg.coef_[0] < 0: # jak ostatnia sprzedaż była dawno to przewiduje przed now i mówi o dostawie
+        new_date = now + timedelta(days=int(Y[-1]/sale_for_day))
+        return (name, 'Potrzebujesz dostawy' if new_date == now else new_date.date(), sale_ratio, sale_for_day)
     return (name, supply_date.date(), sale_ratio, sale_for_day)
     # plt.plot(X_scale,Y)
     # plt.plot(x,y)

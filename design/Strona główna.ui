@@ -38,7 +38,7 @@
         <child>
           <object class="ttk.Button" id="button_1">
             <property name="idtocommand">false</property>
-            <property name="text" translatable="yes">Analizuj dane sprzedaży</property>
+            <property name="text" translatable="yes">Wizualizuj dane</property>
             <bind sequence="&lt;1&gt;" handler="callback" add="" />
             <layout manager="pack">
               <property name="fill">x</property>
@@ -53,7 +53,7 @@
         <child>
           <object class="ttk.Button" id="button_2">
             <property name="idtocommand">false</property>
-            <property name="text" translatable="yes">Pokaż dane sprzedaży towaru</property>
+            <property name="text" translatable="yes">Pokaż sezonowe produkty</property>
             <layout manager="pack">
               <property name="fill">x</property>
               <property name="ipady">5</property>
@@ -66,7 +66,7 @@
         <child>
           <object class="ttk.Button" id="button_3">
             <property name="idtocommand">false</property>
-            <property name="text" translatable="yes">Sprawdź czy nie potrzebuję dostawy</property>
+            <property name="text" translatable="yes">Analizuj sprzedaż</property>
             <layout manager="pack">
               <property name="fill">x</property>
               <property name="ipady">5</property>
@@ -91,7 +91,7 @@
         <child>
           <object class="ttk.Button" id="button_1_2">
             <property name="idtocommand">false</property>
-            <property name="text" translatable="yes">Dodaj produkt</property>
+            <property name="text" translatable="yes">Produkt</property>
             <layout manager="pack">
               <property name="expand">true</property>
               <property name="fill">x</property>
@@ -123,7 +123,7 @@
         <child>
           <object class="ttk.Button" id="button_5">
             <property name="idtocommand">false</property>
-            <property name="text" translatable="yes">Raport sprzedaży</property>
+            <property name="text" translatable="yes">Sprzedaż</property>
             <layout manager="pack">
               <property name="expand">true</property>
               <property name="fill">x</property>

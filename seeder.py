@@ -8,7 +8,7 @@ produkty = [('Kajak', 1200, 23, 'Sporty wodne', ''), ('Czepek', 20, 17, 'Sporty 
 daty = pd.date_range('2021-01-01', periods=365, freq='D')
 
 
-def supply_sales(random_dates, price, id, sale_to):
+def simulate(random_dates, price, id, sale_to):
     sprzedaz = True
     dostawy_sprzedaze = [(price*0.8, r.randint(30,50), random_dates[0].date().strftime('%Y-%m-%d'), id)]
     print(dostawy_sprzedaze)
@@ -55,7 +55,7 @@ for index, i in enumerate(produkty):
     else:
         random_dates = pd.date_range('2021-01-01', periods=12, freq='25D')
         sale_to = 4
-    cursor.executemany(f"INSERT INTO Data(quantity_price,amount,date,id_product) VALUES (?,?,?,?)",supply_sales(random_dates, i[1], index+1, sale_to))
+    cursor.executemany(f"INSERT INTO Data(quantity_price,amount,date,id_product) VALUES (?,?,?,?)",simulate(random_dates, i[1], index+1, sale_to))
 
 conn.commit()
 
