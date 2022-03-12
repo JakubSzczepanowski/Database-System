@@ -23,7 +23,6 @@ class PredictResume:
         self.frame_1.configure(height='1000', width='1000')
         self.frame_1.pack(fill='both', expand=True, side='top')
 
-        # Main widget
         self.mainwindow = self.frame_1
         x = self.master.winfo_screenwidth() // 2 - 1200 // 2 - 10
         y = self.master.winfo_screenheight() // 2 - 400 // 2 - 10

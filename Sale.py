@@ -6,7 +6,6 @@ import DB_Connection
 
 class Sale:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)

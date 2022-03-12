@@ -6,7 +6,6 @@ import analytics
 
 class Visualization:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(master)
         self.label_1 = ttk.Label(self.frame_1)
@@ -44,7 +43,6 @@ class Visualization:
         self.frame_1.configure(height='200', padding='10', width='200')
         self.frame_1.pack(side='top')
 
-        # Main widget
         self.mainwindow = self.frame_1
         x = self.master.winfo_screenwidth() // 2 - 278 // 2 - 10
         y = self.master.winfo_screenheight() // 2 - 231 // 2 - 10

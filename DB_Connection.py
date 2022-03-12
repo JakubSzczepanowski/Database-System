@@ -5,7 +5,6 @@ import Exceptions as E
 def open_connection():
     global conn,cursor
     conn = sqlite3.connect('database.db', check_same_thread=False)
-    print('Otwarto połączenie')
     cursor = conn.cursor()
 
 def create_settings_table(obj,data):
@@ -98,7 +97,6 @@ def select_with_filters(type, params):
             dynamic_query += f"{key} = ?"
             next_member = True
             query_members.append(value)
-    print(dynamic_query, query_members)
     cursor.execute(dynamic_query, query_members)
     return cursor.fetchall()
 
@@ -233,4 +231,3 @@ def insert_sale(obj,prod):
     
 def close_connection():
     conn.close()
-    print('Zamknięto połączenie')

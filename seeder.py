@@ -11,9 +11,7 @@ daty = pd.date_range('2021-01-01', periods=365, freq='D')
 def simulate(random_dates, price, id, sale_to):
     sprzedaz = True
     dostawy_sprzedaze = [(price*0.8, r.randint(30,50), random_dates[0].date().strftime('%Y-%m-%d'), id)]
-    print(dostawy_sprzedaze)
     cumulative = dostawy_sprzedaze[0][1]
-    print(cumulative)
     for i in range(1, len(random_dates)-1):
         if cumulative <= 5: 
             sprzedaz = False
@@ -23,19 +21,8 @@ def simulate(random_dates, price, id, sale_to):
         else: amount = r.randint(30,50)
         dostawy_sprzedaze.append((None if sprzedaz else price*0.8, amount, random_dates[i].date().strftime('%Y-%m-%d'), id))
         cumulative += -amount if sprzedaz else amount
-        print(dostawy_sprzedaze[i], cumulative)
         if sprzedaz == False: sprzedaz = True
     return dostawy_sprzedaze
-
-
-# for index, i in enumerate(produkty):
-#     random_dates = pd.to_datetime(
-#     np.concatenate([
-#             np.random.choice(daty[1:-1], size=20, replace=False),
-#             daty[[0, -1]]
-#         ])
-#     ).sort_values()
-#     supply_sales(random_dates, i[1], index+1)
 
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()

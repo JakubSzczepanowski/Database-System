@@ -7,7 +7,6 @@ from tkcalendar import DateEntry
 
 class Edit:
     def __init__(self, master,type):
-        # build ui
         self.master = master
         self.type = type
         self.frame_1 = ttk.Frame(self.master)
@@ -215,7 +214,6 @@ class Edit:
         self.frame_1.configure(height='200', padding='8', width='200')
         self.frame_1.pack(side='top')
         
-        # Main widget
         self.mainwindow = self.frame_1
         if self.type == 0:
             a,b = 720,349
@@ -239,9 +237,7 @@ class Edit:
         params = {}
         params['Products.section'], params['Products.name'], params['Data.quantity_price'], params['Data.amount'], params['Products.netto_price'], params['Products.vat_percentage'], params['Data.date'], params['Products.season'] = \
             self.combobox_1.get(), self.combobox_2.get(), self.entry_5.get(), self.entry_6.get(), self.entry_7.get(), self.entry_8.get(), self.dateEntry.get_date().strftime('%Y-%m-%d') if self.dateEntry._validate_date() else "", self.combobox_4.get()
-        print(params)
         filtered_grid = DB_Connection.select_with_filters(self.type, params)
-        print(filtered_grid)
         self.treeview_1.delete(*self.treeview_1.get_children())
         self.add_items(filtered_grid)
 
@@ -313,7 +309,6 @@ class Edit:
         self.entry_4.delete(0,END)
         self.combobox_3.set('')
         item = self.treeview_1.item(selected)['values']
-        print(item)
         self.id = item[0]
         self.entry_1.insert(0,item[1])
         self.entry_2.insert(0,item[2])

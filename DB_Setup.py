@@ -4,7 +4,6 @@ from tkinter import messagebox
 
 class DB_Setup:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
@@ -72,7 +71,6 @@ class DB_Setup:
         self.frame_1.configure(height='200', padding='10', width='200')
         self.frame_1.pack(side='top')
 
-        # Main widget
         self.mainwindow = self.frame_1
         self.master.resizable(0,0)
         x = self.master.winfo_screenwidth() // 2 - 430 // 2 - 10

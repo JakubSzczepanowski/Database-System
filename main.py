@@ -8,7 +8,6 @@ import threading
 
 class Main:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.master.title('Panel główny')
         self.menu = tk.Menu(self.master, tearoff=0)
@@ -65,14 +64,12 @@ class Main:
         self.frame_1.configure(height='200', padding='8', width='200')
         self.frame_1.pack(side='top')
 
-        # Main widget
         self.mainwindow = self.frame_1
         self.master.resizable(0,0)
         x = self.master.winfo_screenwidth() // 2 - 514 // 2 - 10
         y = self.master.winfo_screenheight() // 2 - 309 // 2 - 10
         self.master.geometry(f'+{x}+{y}')
         self.master.protocol("WM_DELETE_WINDOW", self.close_window)
-        #self.master.attributes("-topmost", True)
 
     def open_sale(self,event):
         import Sale
@@ -111,26 +108,18 @@ class Main:
         dlg = tk.Toplevel(self.master)
         dialog = Supply.Supply(dlg)
         dialog.fill_combobox1()
-        dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg)) # intercept close button
-        dialog.master.transient(self.master)   # dialog window is related to main
-        dialog.master.wait_visibility() # can't grab until window appears, so we wait
-        dialog.master.grab_set()        # ensure all input goes to our window
-        dialog.master.wait_window()     # block until window is destroyed
+        dialog.master.protocol("WM_DELETE_WINDOW", lambda arg=dialog.master: self.close_dialog(arg))
+        dialog.master.transient(self.master)
+        dialog.master.wait_visibility()
+        dialog.master.grab_set()
+        dialog.master.wait_window()
 
     def open_visualisation(self,event):
         import Visualization
-        # dlg = tk.Toplevel(self.master)
         r = tk.Tk()
         dialog = Visualization.Visualization(r)
         dialog.fill_combobox1()
         dialog.run()
-        # dialog.master.transient(self.master)
-        # dialog.master.wait_visibility()
-        # dialog.master.grab_set()
-        # dialog.master.wait_window()
-
-    # def async_thread(self, event_loop):
-    #     event_loop.run_until_complete()
     
     def calculate_predicts(self):
         self.button_3.config(state=tk.DISABLED)
@@ -139,7 +128,6 @@ class Main:
         dialog = PredictResume.PredictResume(r)
         for name in DB_Connection.select_products_names():
             try:
-                print(name)
                 resume = predict_resume(name[0])
             except IndexError:
                 resume = (name[0], 'Brak danych', 'Brak danych', 'Brak danych')
