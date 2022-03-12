@@ -4,7 +4,7 @@ import Exceptions as E
 
 def open_connection():
     global conn,cursor
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('database.db', check_same_thread=False)
     print('Otwarto połączenie')
     cursor = conn.cursor()
 

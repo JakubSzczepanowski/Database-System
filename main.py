@@ -4,6 +4,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 import DB_Connection
 from analytics import predict_resume
+import threading
 
 class Main:
     def __init__(self, master=None):
@@ -127,7 +128,10 @@ class Main:
         # dialog.master.grab_set()
         # dialog.master.wait_window()
 
-    def open_predict_resume(self, event):
+    # def async_thread(self, event_loop):
+    #     event_loop.run_until_complete()
+    
+    def calculate_predicts(self):
         import PredictResume
         r = tk.Tk()
         dialog = PredictResume.PredictResume(r)
@@ -141,6 +145,10 @@ class Main:
                 resume = (name[0], 'Nie potrzebujesz dostawy', 'Większa obniżka', 0)
             dialog.add_item(resume)
         dialog.run()
+
+    def open_predict_resume(self, event):
+        threading.Thread(target=self.calculate_predicts).start()
+        
 
     def open_seasonal_result(self, event):
         import SeasonalResume
