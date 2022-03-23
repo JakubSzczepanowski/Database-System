@@ -184,6 +184,7 @@ class Main:
         if os.path.isfile(path):
             DB_Connection.close_connection()
             os.remove(path)
+            messagebox.showinfo(parent=self.master,title='Info',message='Baza danych została pomyślnie usunięta')
         else:
             messagebox.showerror(parent=self.master,title='Błąd',message='Nie znaleziono pliku bazy danych')
 

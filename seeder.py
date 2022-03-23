@@ -9,20 +9,20 @@ daty = pd.date_range('2021-01-01', periods=365, freq='D')
 
 
 def simulate(random_dates, price, id, sale_to):
-    sprzedaz = True
-    dostawy_sprzedaze = [(price*0.8, r.randint(30,50), random_dates[0].date().strftime('%Y-%m-%d'), id)]
-    cumulative = dostawy_sprzedaze[0][1]
+    is_sale = True
+    supplies_sales = [(price*0.8, r.randint(30,50), random_dates[0].date().strftime('%Y-%m-%d'), id)]
+    cumulative = supplies_sales[0][1]
     for i in range(1, len(random_dates)-1):
         if cumulative <= 5: 
-            sprzedaz = False
-        if sprzedaz:
+            is_sale = False
+        if is_sale:
             amount = r.randint(1,sale_to)
             while amount > cumulative: amount = r.randint(1,sale_to)
         else: amount = r.randint(30,50)
-        dostawy_sprzedaze.append((None if sprzedaz else price*0.8, amount, random_dates[i].date().strftime('%Y-%m-%d'), id))
-        cumulative += -amount if sprzedaz else amount
-        if sprzedaz == False: sprzedaz = True
-    return dostawy_sprzedaze
+        supplies_sales.append((None if is_sale else price*0.8, amount, random_dates[i].date().strftime('%Y-%m-%d'), id))
+        cumulative += -amount if is_sale else amount
+        if is_sale == False: is_sale = True
+    return supplies_sales
 
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
