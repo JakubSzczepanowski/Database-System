@@ -239,6 +239,7 @@ class Edit:
             self.combobox_1.get(), self.combobox_2.get(), self.entry_5.get(), self.entry_6.get(), self.entry_7.get(), self.entry_8.get(), self.dateEntry.get_date().strftime('%Y-%m-%d') if self.dateEntry._validate_date() else "", self.combobox_4.get()
         filtered_grid = DB_Connection.select_with_filters(self.type, params)
         self.treeview_1.delete(*self.treeview_1.get_children())
+        self.dateEntry.delete(0, END)
         self.add_items(filtered_grid)
 
     def clear(self, event):
@@ -268,8 +269,7 @@ class Edit:
                 if pr.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
                     DB_Connection.edit_product(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section,pr.Season))
-                    self.treeview_1.delete(focused)
+                    self.treeview_1.item(focused, values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section,pr.Season))
             elif self.type == 1:
                 pr.Quantity_price = (self.entry_1.get(),self.master)
                 pr.Amount = (self.entry_2.get(),self.master)
@@ -277,16 +277,14 @@ class Edit:
                     DB_Connection.edit_supply(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],item[2],pr.Quantity_price,pr.Amount,item[5]))
-                    self.treeview_1.delete(focused)
+                    self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Quantity_price,pr.Amount,item[5]))
             else:
                 pr.Amount = (self.entry_1.get(),self.master)
                 if pr.final_prod_check([pr.Amount]):
                     DB_Connection.edit_sale(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],item[2],pr.Amount,item[4]))
-                    self.treeview_1.delete(focused)
+                    self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Amount,item[4]))
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz edytować')
 
