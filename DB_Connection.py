@@ -142,9 +142,9 @@ def delete_supply_or_sale(id):
     cursor.execute("DELETE FROM Data WHERE id_record=?",(id,))
     conn.commit()
 
-def check_amount_correctness(obj,amount):
+def check_amount_correctness(obj,amount,name):
     try:
-        cursor.execute("SELECT amount,quantity_price FROM Data")
+        cursor.execute(f"SELECT amount,quantity_price FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Products.name='{name}'")
         result = 0
         for elem in cursor.fetchall():
             result += elem[0] if elem[1] is not None else -elem[0]

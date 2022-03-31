@@ -279,11 +279,11 @@ class Edit:
                     item = self.treeview_1.item(focused)['values']
                     self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Quantity_price,pr.Amount,item[5]))
             else:
+                focused = self.treeview_1.focus()
+                item = self.treeview_1.item(focused)['values']
                 pr.Amount = (self.entry_1.get(),self.master)
-                if pr.final_prod_check([pr.Amount]):
+                if pr.final_prod_check([pr.Amount]) and DB_Connection.check_amount_correctness(self.master,pr.Amount, item[2]):
                     DB_Connection.edit_sale(self.master,pr,self.id)
-                    focused = self.treeview_1.focus()
-                    item = self.treeview_1.item(focused)['values']
                     self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Amount,item[4]))
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz edytować')
