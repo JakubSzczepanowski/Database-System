@@ -5,6 +5,7 @@ from tkinter import messagebox
 import DB_Connection
 from analytics import predict_resume
 import threading
+import os
 
 class Main:
     def __init__(self, master=None):
@@ -72,6 +73,7 @@ class Main:
         self.master.protocol("WM_DELETE_WINDOW", self.close_window)
 
     def open_sale(self,event):
+        if self.check_database(): return
         import Sale
         dlg = tk.Toplevel(self.master)
         dialog = Sale.Sale(dlg)
@@ -83,6 +85,7 @@ class Main:
         dialog.master.wait_window() 
 
     def open_adding(self,event):
+        if self.check_database(): return
         import AddProd
         dlg = tk.Toplevel(self.master)
         dialog = AddProd.AddProd(dlg)
@@ -93,6 +96,7 @@ class Main:
         dialog.master.wait_window()
 
     def open_edit(self,type):
+        if self.check_database(): return
         import Edit
         dlg = tk.Toplevel(self.master)
         dialog = Edit.Edit(dlg,type)
@@ -104,6 +108,7 @@ class Main:
         dialog.master.wait_window()
 
     def open_supply(self,event):
+        if self.check_database(): return
         import Supply
         dlg = tk.Toplevel(self.master)
         dialog = Supply.Supply(dlg)
@@ -115,6 +120,7 @@ class Main:
         dialog.master.wait_window()
 
     def open_visualisation(self,event):
+        if self.check_database(): return
         import Visualization
         r = tk.Tk()
         dialog = Visualization.Visualization(r)
@@ -138,10 +144,12 @@ class Main:
         dialog.run()
 
     def open_predict_resume(self, event):
+        if self.check_database(): return
         threading.Thread(target=self.calculate_predicts).start()
         
 
     def open_seasonal_result(self, event):
+        if self.check_database(): return
         import SeasonalResume
         r = tk.Tk()
         dialog = SeasonalResume.SeasonalResume(r)
@@ -173,7 +181,7 @@ class Main:
         if os.path.isfile(path):
             return messagebox.showerror(parent=self.master,title='Błąd',message='Istnieje już plik bazy danych')
         f = filedialog.askopenfilename(parent=self.master, defaultextension='.db', filetypes=(("Plik bazy danych", "*.db"),("Wszystkie pliki", "*.*")))
-        if f is None:
+        if f == '':
             return
         shutil.copy(f, os.path.curdir)
         DB_Connection.open_connection()
@@ -187,6 +195,17 @@ class Main:
             messagebox.showinfo(parent=self.master,title='Info',message='Baza danych została pomyślnie usunięta')
         else:
             messagebox.showerror(parent=self.master,title='Błąd',message='Nie znaleziono pliku bazy danych')
+
+    def check_database(self):
+        if not os.path.isfile('database.db'):
+            if messagebox.askquestion(title='Pytanie', message='Brakuje pliku z bazą danych. Chcesz ją utworzyć?', parent=self.master) == 'yes':
+                import DB_Setup
+                r = tk.Tk()
+                db_setup = DB_Setup.DB_Setup(r)
+                self.master.destroy()
+                db_setup.run()
+            return True
+        return False
 
     def close_window(self):
         DB_Connection.close_connection()
