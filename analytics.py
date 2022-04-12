@@ -10,27 +10,28 @@ def show_supply_plot(name):
     lista = DB_Connection.select_supplies_for_specific_product(name)
     if len(lista) == 0: raise IndexError
     plt.title('Wykres dostaw w funkcji czasu')
-    show_plot(lista)
+    show_plot(lista, is_supply=True)
 
 def show_cumulative_amount_plot(name):
     lista = DB_Connection.select_amount_and_date_for_specific_product(name)
     if len(lista) == 0: raise IndexError
     plt.title('Wykres bieżących ilości na stanie w funkcji czasu')
-    show_plot(lista, True)
-
+    show_plot(lista, cumulative=True)
 
 def show_sale_plot(name):
     lista = DB_Connection.select_sales_for_specific_product(name)
     plt.title('Wykres sprzedaży w funkcji czasu')
     show_plot(lista)
 
-def show_plot(lista, cumulative=False):
+def show_plot(lista, cumulative=False, is_supply=False):
     lista = np.array(lista)
     X, Y = extract_time_domain_and_amount_range(lista)
-    cumulate_supply_dates(X, Y)
+    if is_supply:
+        cumulate_dates(X, Y, None, True)
     if cumulative:
-        cumulate = 0
         Z = list(map(lambda item: False if item is None else True, lista[:,2]))
+        cumulate_dates(X, Y, Z)
+        cumulate = 0
         for i in range(len(Y)):
             cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
             Y[i] = cumulate
@@ -50,7 +51,7 @@ def extract_timestamp_domain_and_amount_range(data):
     amounts = list(map(int, data[:,1]))
     return (dates, amounts)
 
-def cumulate_supply_dates(X,Y):
+def cumulate_dates(X, Y, Z, is_supply=False):
     pointer = (0, X[0])
     same = []; i = 0
     while i != len(X)-1:
@@ -61,44 +62,48 @@ def cumulate_supply_dates(X,Y):
             same.append(i)
         else:
             if len(same) != 0:
-                transform_specific_dates(X, Y, same)
+                transform_specific_dates(X, Y, Z, same, is_supply)
                 i -= len(same)
                 same.clear()
             pointer = (i, X[i])
         if i == len(X)-1 and len(same) != 0:
-            transform_specific_dates(X, Y, same)
+            transform_specific_dates(X, Y, Z, same, is_supply)
             i -= len(same)
             same.clear()
 
-def transform_specific_dates(X, Y, same):
+def transform_specific_dates(X, Y, Z, same, is_supply):
     new_value = 0
     for i in same:
-        new_value += Y[i]
+        if is_supply: new_value += Y[i]
+        else: new_value += Y[i] if Z[i] else -Y[i]
     Y[same[0]] = new_value
+    Z[same[0]] = True
     del same[0]
-    for i in same:
-        del X[i]
-        del Y[i]
+    for _ in same:
+        del X[same[0]]
+        del Y[same[0]]
+        if not is_supply: del Z[same[0]]
 
 def predict_resume(name):
     lista = DB_Connection.select_amount_and_date_for_specific_product(name)
     
     lista = np.array(lista)
-    cut = 0; index = len(lista)-1; cut2 = 0
+    X, Y = extract_timestamp_domain_and_amount_range(lista)
+    Z = list(map(lambda item: False if item is None else True, lista[:,2]))
+    data_backup = (X,Y)
+    cumulate_dates(X, Y, Z)
+    cut = 0; index = len(X)-1; cut2 = 0
     while index != 0:
-        if lista[index][2] is not None:
+        if Z[index]:
             if cut == 0: cut = index
             elif cut2 == 0: 
                 cut2 = index
                 break
         index -= 1
     
-    lista_backup = lista.copy()
-    lista = lista[cut:]
-    if len(lista) in (0,1): raise IndexError
-    days_range = (datetime.strptime(lista[-1,0], '%Y-%m-%d')-datetime.strptime(lista[0,0], '%Y-%m-%d')).days
-    X, Y = extract_timestamp_domain_and_amount_range(lista)
-    cumulate_supply_dates(X, Y)
+    X, Y, Z = X[cut:], Y[cut:], Z[cut:]
+    if len(X) in (0,1): raise IndexError
+    days_range = (datetime.fromtimestamp(X[-1])-datetime.fromtimestamp(X[0])).days
     cumulate = 0
     for i in range(len(Y)):
         if i == 0:
@@ -110,9 +115,10 @@ def predict_resume(name):
     sale_for_day = (Y[0]-Y[-1])/days_range
     sale_ratio = 'Brakuje danych'
     if cut2 < cut:
-        old_sale = lista_backup[cut2:cut]
-        old_amounts = list(map(int, old_sale[:,1]))
-        old_days_range = (datetime.strptime(old_sale[-1,0], '%Y-%m-%d')-datetime.strptime(old_sale[0,0], '%Y-%m-%d')).days
+        old_X, old_Y = data_backup
+        old_dates = old_X[cut2:cut]
+        old_amounts = old_Y[cut2:cut]
+        old_days_range = (datetime.fromtimestamp(old_dates[-1])-datetime.fromtimestamp(old_dates[0])).days
         old_sale_for_day = (old_amounts[0]-old_amounts[-1])/old_days_range
         sale_ratio = sale_for_day/old_sale_for_day*100
     
