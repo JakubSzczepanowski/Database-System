@@ -1,6 +1,6 @@
 class NegativeValueError(Exception):
     def __init__(self):
-        super(NegativeValueError,self).__init__('Podano ujemną liczbę')
+        super(NegativeValueError,self).__init__('Podano liczbę ujemną lub równą zero')
 
 class ValueOutOfRangeError(Exception):
     def __init__(self):

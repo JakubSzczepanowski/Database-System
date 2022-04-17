@@ -116,7 +116,7 @@ class Product:
             elif len(n) < x or len(n) > y:
                 raise E.ValueOutOfRangeError
             n = int(n)
-            if n < 0:
+            if n <= 0:
                 raise E.NegativeValueError
         except ValueError:
             messagebox.showerror(parent=obj,title='Błąd',message='W polu przeznaczonym na liczbę wstawiono znaki')
@@ -134,7 +134,7 @@ class Product:
             elif len(n.split('.')[0]) < x or len(n.split('.')[0]) > y:
                 raise E.ValueOutOfRangeError
             n = round(float(n),2)
-            if n < 0:
+            if n <= 0:
                 raise E.NegativeValueError
         except ValueError as e:
             messagebox.showerror(parent=obj,title='Błąd',message='W polu przeznaczonym na liczbę wstawiono znaki')

@@ -77,7 +77,7 @@ def transform_specific_dates(X, Y, Z, same, is_supply):
         if is_supply: new_value += Y[i]
         else: new_value += Y[i] if Z[i] else -Y[i]
     Y[same[0]] = new_value
-    Z[same[0]] = True
+    if not is_supply: Z[same[0]] = True
     del same[0]
     for _ in same:
         del X[same[0]]
@@ -90,8 +90,12 @@ def predict_resume(name):
     lista = np.array(lista)
     X, Y = extract_timestamp_domain_and_amount_range(lista)
     Z = list(map(lambda item: False if item is None else True, lista[:,2]))
-    data_backup = (X,Y)
     cumulate_dates(X, Y, Z)
+    cumulate = 0
+    for i in range(len(Y)):
+        cumulate += Y[i] if Z[i] or Y[i] < 0 else -Y[i]
+        Y[i] = cumulate
+    data_backup = (X,Y)
     cut = 0; index = len(X)-1; cut2 = 0
     while index != 0:
         if Z[index]:
@@ -104,17 +108,10 @@ def predict_resume(name):
     X, Y, Z = X[cut:], Y[cut:], Z[cut:]
     if len(X) in (0,1): raise IndexError
     days_range = (datetime.fromtimestamp(X[-1])-datetime.fromtimestamp(X[0])).days
-    cumulate = 0
-    for i in range(len(Y)):
-        if i == 0:
-            cumulate += Y[i]
-        else:
-            cumulate -= Y[i]
-        Y[i] = cumulate
 
     sale_for_day = (Y[0]-Y[-1])/days_range
     sale_ratio = 'Brakuje danych'
-    if cut2 < cut:
+    if abs(cut2-cut) > 1:
         old_X, old_Y = data_backup
         old_dates = old_X[cut2:cut]
         old_amounts = old_Y[cut2:cut]
@@ -127,7 +124,7 @@ def predict_resume(name):
     X_scale = sca.transform(X)
     lin_reg = LinearRegression()
     lin_reg.fit(X_scale, Y)
-    if lin_reg.coef_[0] == 0: raise ZeroDivisionError
+    if lin_reg.coef_[0] == 0: return (name, 'Nie potrzebujesz dostawy', sale_ratio, sale_for_day)
     when_empty = sca.inverse_transform(-lin_reg.intercept_/lin_reg.coef_)
     
     now = datetime.now()

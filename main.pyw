@@ -137,8 +137,6 @@ class Main:
                 resume = predict_resume(name[0])
             except IndexError:
                 resume = (name[0], 'Brak danych', 'Brak danych', 'Brak danych')
-            except ZeroDivisionError:
-                resume = (name[0], 'Nie potrzebujesz dostawy', 'Większa obniżka', 0)
             dialog.add_item(resume)
         self.button_3.config(state=tk.NORMAL)
         dialog.run()
@@ -174,6 +172,7 @@ class Main:
         archive.write(path)
         archive.close()
         f.close()
+        messagebox.showinfo(parent=self.master,title='Info',message='Baza danych została pomyślnie wyeksportowana')
 
     def import_database(self):
         import os, shutil
@@ -185,6 +184,7 @@ class Main:
             return
         shutil.copy(f, os.path.curdir)
         DB_Connection.open_connection()
+        messagebox.showinfo(parent=self.master,title='Info',message='Baza danych została pomyślnie zaimportowana')
 
     def delete_database(self):
         import os
