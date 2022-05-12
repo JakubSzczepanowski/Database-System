@@ -4,8 +4,7 @@ import Exceptions as E
 
 def open_connection():
     global conn,cursor
-    conn = sqlite3.connect('database.db')
-    print('Otwarto połączenie')
+    conn = sqlite3.connect('database.db', check_same_thread=False)
     cursor = conn.cursor()
 
 def create_settings_table(obj,data):
@@ -24,12 +23,13 @@ def create_settings_table(obj,data):
             netto_price_max integer
         )""")
 
-        cursor.execute(f"""CREATE TABLE Products (
+        cursor.execute("""CREATE TABLE Products (
         id_product integer PRIMARY KEY,
         name text,
         netto_price real,
         vat_percentage integer,
-        section text
+        section text,
+        season text
         )""")
 
         cursor.execute("""CREATE TABLE Data (
@@ -61,7 +61,7 @@ def get_sections():
         sections.append(elem[0].replace('_',' '))
     return sections
 
-def get_products(section):
+def get_products_for_section(section):
     cursor.execute(f"SELECT name FROM Products WHERE section='{section}'")
     products = []
     for elem in cursor.fetchall():
@@ -70,6 +70,10 @@ def get_products(section):
 
 def select_products():
     cursor.execute("SELECT * FROM Products")
+    return cursor.fetchall()
+
+def select_seasonal_products(season):
+    cursor.execute(f"SELECT name,section FROM Products WHERE season = '{season}'")
     return cursor.fetchall()
 
 def select_with_filters(type, params):
@@ -87,12 +91,12 @@ def select_with_filters(type, params):
         next_member = True
     for key, value in params.items():
         if value:
+            if value == 'Całoroczne': value = ''
             if next_member: dynamic_query += " AND "
             elif type == 0: dynamic_query += " WHERE "
             dynamic_query += f"{key} = ?"
             next_member = True
             query_members.append(value)
-    print(dynamic_query, query_members)
     cursor.execute(dynamic_query, query_members)
     return cursor.fetchall()
 
@@ -131,6 +135,7 @@ def select_amount_and_date_for_specific_product(name):
     return cursor.fetchall()
 
 def delete_product(id):
+    cursor.execute("DELETE FROM Data WHERE id_product=?",(id,))
     cursor.execute("DELETE FROM Products WHERE id_product=?",(id,))
     conn.commit()
 
@@ -138,9 +143,11 @@ def delete_supply_or_sale(id):
     cursor.execute("DELETE FROM Data WHERE id_record=?",(id,))
     conn.commit()
 
-def check_amount_correctness(obj,amount):
+def check_amount_correctness(obj,amount,name,id):
     try:
-        cursor.execute("SELECT amount,quantity_price FROM Data")
+        query = f"SELECT amount,quantity_price FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Products.name='{name}'"
+        if id is not None: query += f" AND Data.id_record <> {id}"
+        cursor.execute(query)
         result = 0
         for elem in cursor.fetchall():
             result += elem[0] if elem[1] is not None else -elem[0]
@@ -158,9 +165,9 @@ def insert_product(obj,prod):
         for elem in cursor.fetchall():
             if elem[0] == prod.Name:
                 raise E.NameInThatSectionExistError
-        cursor.execute(f"""INSERT INTO Products (name,netto_price,vat_percentage,section) 
-        VALUES (:name,:netto_price,:vat_percentage,:section)""",\
-            {'name':prod.Name,'netto_price':prod.Netto_price,'vat_percentage':prod.Vat_percentage,'section':prod.Section})
+        cursor.execute(f"""INSERT INTO Products (name,netto_price,vat_percentage,section,season) 
+        VALUES (:name,:netto_price,:vat_percentage,:section,:season)""",\
+            {'name':prod.Name,'netto_price':prod.Netto_price,'vat_percentage':prod.Vat_percentage,'section':prod.Section,'season':prod.Season})
         conn.commit()
     except E.NameInThatSectionExistError as e:
         messagebox.showerror(parent=obj,title='Błąd',message=e)
@@ -170,13 +177,14 @@ def insert_product(obj,prod):
         messagebox.showinfo(parent=obj,title='Info',message='Produkt został pomyślnie dodany')
 
 def edit_product(obj,prod,id):
-    try:
-        cursor.execute(f"""UPDATE Products SET name=?,netto_price=?,
-        vat_percentage=?,section=? WHERE id_product=?
-        """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,id))
-        conn.commit()
-    except Exception as e:
-        messagebox.showerror(parent=obj,title='Błąd',message=e)
+    cursor.execute(f"SELECT name FROM Products WHERE section='{prod.Section}' AND id_product <> {id}")
+    for elem in cursor.fetchall():
+        if elem[0] == prod.Name:
+            raise E.NameInThatSectionExistError
+    cursor.execute(f"""UPDATE Products SET name=?,netto_price=?,
+    vat_percentage=?,section=?,season=? WHERE id_product=?
+    """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,prod.Season,id))
+    conn.commit()
 
 def edit_supply(obj,prod,id):
     try:
@@ -210,11 +218,11 @@ def insert_supply(obj,prod):
 def insert_sale(obj,prod):
     try:
         cursor.execute(f"SELECT id_record, date, amount FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL AND Products.name='{prod.Name}' ORDER BY Data.id_record DESC LIMIT 1")
-        last_supply = cursor.fetchone()
-        if last_supply is not None and last_supply[1] == prod.Date:
-            cursor.execute(f"UPDATE Data SET amount={last_supply[2]+prod.Amount} WHERE id_record = {last_supply[0]}")
+        last_sale = cursor.fetchone()
+        if last_sale is not None and last_sale[1] == prod.Date:
+            cursor.execute(f"UPDATE Data SET amount={last_sale[2]+prod.Amount} WHERE id_record = {last_sale[0]}")
         else:
-            cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}'")
+            cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}' AND section='{prod.Section}'")
             id_product = cursor.fetchone()[0]
             cursor.execute("""INSERT INTO Data(quantity_price,amount,date,id_product) 
             VALUES (null,:amount,:date,:id_product)""",\
@@ -227,4 +235,3 @@ def insert_sale(obj,prod):
     
 def close_connection():
     conn.close()
-    print('Zamknięto połączenie')

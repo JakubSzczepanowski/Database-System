@@ -4,7 +4,6 @@ import tkinter.ttk as ttk
 
 class AddProd:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
@@ -42,6 +41,16 @@ class AddProd:
         self.entry_4.pack(expand='true', fill='x', padx='3', pady='3', side='left')
         self.frame_5.configure(height='200', width='200')
         self.frame_5.pack(expand='true', fill='x', side='top')
+        self.frame_6 = ttk.Frame(self.frame_1)
+        self.label_6 = ttk.Label(self.frame_6)
+        self.label_6.configure(text='Sezon', width='5')
+        self.label_6.pack(expand='true', fill='x', padx='3', pady='3', side='left')
+
+        self.combobox_1 = ttk.Combobox(self.frame_6,state="readonly", values=('','Letni','Zimowy'))
+        self.combobox_1.pack(expand='true', fill='x', padx='3', pady='3', side='left')
+        self.frame_6.configure(height='200', width='200')
+        self.frame_6.pack(expand='true', fill='x', side='top')
+        
         self.button_1 = ttk.Button(self.frame_1)
         self.button_1.configure(text='Dodaj produkt')
         self.button_1.pack(expand='true', fill='x', ipady='10', padx='5', pady='5', side='top')
@@ -62,5 +71,6 @@ class AddProd:
         pr.Name = (self.entry_2.get(),self.master)
         pr.Netto_price = (self.entry_3.get(),self.master)
         pr.Vat_percentage = (self.entry_4.get(),self.master)
+        pr.Season = self.combobox_1['values'][self.combobox_1.current()]
         if pr.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
             DB_Connection.insert_product(self.master,pr)

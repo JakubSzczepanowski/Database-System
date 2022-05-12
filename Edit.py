@@ -7,7 +7,6 @@ from tkcalendar import DateEntry
 
 class Edit:
     def __init__(self, master,type):
-        # build ui
         self.master = master
         self.type = type
         self.frame_1 = ttk.Frame(self.master)
@@ -81,6 +80,15 @@ class Edit:
         self.frame_11.configure(height='200', width='200')
         self.frame_11.pack(expand='true', fill='x', side='top')
 
+        self.frame_13 = ttk.Frame(self.frame_4)
+        self.label_8 = ttk.Label(self.frame_13)
+        self.label_8.configure(text='Sezon', width='15')
+        self.label_8.pack(padx='5', pady='5', side='left')
+        self.combobox_4 = ttk.Combobox(self.frame_13,state="readonly", values=('Całoroczne','Letni','Zimowy'))
+        self.combobox_4.pack(expand='true', fill='x', side='left')
+        self.frame_13.configure(height='200', width='200')
+        self.frame_13.pack(expand='true', fill='x', side='top')
+
         self.frame_12 = ttk.Frame(self.frame_4)
         self.button_3 = ttk.Button(self.frame_12)
         self.button_3.configure(text='Filtruj')
@@ -97,19 +105,21 @@ class Edit:
         self.frame_1.pack(side='top')
         self.id = None
         if self.type == 0:
-            self.treeview_1['columns'] = ('ID','Nazwa','Cena netto','Procent VAT','Dział')
+            self.treeview_1['columns'] = ('ID','Nazwa','Cena netto','Procent VAT','Dział','Sezon')
             self.treeview_1.column("#0", width=0)
             self.treeview_1.column('ID', width=30)
             self.treeview_1.column('Nazwa', width=130)
             self.treeview_1.column('Cena netto', width=80)
             self.treeview_1.column('Procent VAT', width=80)
             self.treeview_1.column('Dział', width=150)
+            self.treeview_1.column('Sezon', width=80)
             self.treeview_1.heading("#0", text='', anchor="w")
             self.treeview_1.heading('ID', text='ID')
             self.treeview_1.heading('Nazwa', text='Nazwa')
             self.treeview_1.heading('Cena netto', text='Cena netto')
             self.treeview_1.heading('Procent VAT', text='Procent VAT')
             self.treeview_1.heading('Dział', text='Dział')
+            self.treeview_1.heading('Sezon', text='Sezon')
             self.add_items(DB_Connection.select_products())
             self.treeview_1.bind('<<TreeviewSelect>>', self.on_select_products)
 
@@ -126,6 +136,8 @@ class Edit:
             self.entry_3.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
             self.entry_4 = ttk.Entry(self.frame_2)
             self.entry_4.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
+            self.combobox_3 = ttk.Combobox(self.frame_2, state="readonly", values=('','Letni','Zimowy'))
+            self.combobox_3.pack(expand='true', fill='x', ipadx='8', ipady='8', padx='2', pady='2', side='left')
             self.frame_2.configure(height='200', width='200')
             self.frame_2.pack(fill='x', side='top')
 
@@ -150,6 +162,7 @@ class Edit:
 
             self.entry_7.config(state='disabled')
             self.entry_8.config(state='disabled')
+            self.combobox_4.config(state='disabled')
 
             self.frame_2 = ttk.Frame(self.frame_1)
             self.entry_1 = ttk.Entry(self.frame_2)
@@ -179,6 +192,7 @@ class Edit:
             self.entry_5.config(state='disabled')
             self.entry_7.config(state='disabled')
             self.entry_8.config(state='disabled')
+            self.combobox_4.config(state='disabled')
 
             self.frame_2 = ttk.Frame(self.frame_1)
             self.entry_1 = ttk.Entry(self.frame_2)
@@ -200,7 +214,6 @@ class Edit:
         self.frame_1.configure(height='200', padding='8', width='200')
         self.frame_1.pack(side='top')
         
-        # Main widget
         self.mainwindow = self.frame_1
         if self.type == 0:
             a,b = 720,349
@@ -217,16 +230,16 @@ class Edit:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
-        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
+        self.combobox_2.set('')
+        self.combobox_2['values'] = DB_Connection.get_products_for_section(self.combobox_1['values'][self.combobox_1.current()])
 
     def filter(self, event):
         params = {}
-        params['Products.section'], params['Products.name'], params['Data.quantity_price'], params['Data.amount'], params['Products.netto_price'], params['Products.vat_percentage'], params['Data.date'] = \
-            self.combobox_1.get(), self.combobox_2.get(), self.entry_5.get(), self.entry_6.get(), self.entry_7.get(), self.entry_8.get(), self.dateEntry.get_date().strftime('%Y-%m-%d') if self.dateEntry._validate_date() else ""
-        print(params)
+        params['Products.section'], params['Products.name'], params['Data.quantity_price'], params['Data.amount'], params['Products.netto_price'], params['Products.vat_percentage'], params['Data.date'], params['Products.season'] = \
+            self.combobox_1.get(), self.combobox_2.get(), self.entry_5.get(), self.entry_6.get(), self.entry_7.get(), self.entry_8.get(), self.dateEntry.get_date().strftime('%Y-%m-%d') if self.dateEntry._validate_date() else "", self.combobox_4.get()
         filtered_grid = DB_Connection.select_with_filters(self.type, params)
-        print(filtered_grid)
         self.treeview_1.delete(*self.treeview_1.get_children())
+        self.dateEntry.delete(0, END)
         self.add_items(filtered_grid)
 
     def clear(self, event):
@@ -237,6 +250,7 @@ class Edit:
         self.entry_7.delete(0, END)
         self.entry_8.delete(0, END)
         self.dateEntry.delete(0, END)
+        self.combobox_4.set('')
 
     def add_items(self,records):
         for r in records:
@@ -251,11 +265,14 @@ class Edit:
                 pr.Netto_price = (self.entry_2.get(),self.master)
                 pr.Vat_percentage = (self.entry_3.get(),self.master)
                 pr.Section = (self.entry_4.get(),self.master)
+                pr.Season = self.combobox_3['values'][self.combobox_3.current()]
                 if pr.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
-                    DB_Connection.edit_product(self.master,pr,self.id)
-                    focused = self.treeview_1.focus()
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section))
-                    self.treeview_1.delete(focused)
+                    try:
+                        DB_Connection.edit_product(self.master,pr,self.id)
+                        focused = self.treeview_1.focus()
+                        self.treeview_1.item(focused, values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section,pr.Season))
+                    except Exception as e:
+                        messagebox.showerror(parent=self.master,title='Błąd',message=e)
             elif self.type == 1:
                 pr.Quantity_price = (self.entry_1.get(),self.master)
                 pr.Amount = (self.entry_2.get(),self.master)
@@ -263,27 +280,32 @@ class Edit:
                     DB_Connection.edit_supply(self.master,pr,self.id)
                     focused = self.treeview_1.focus()
                     item = self.treeview_1.item(focused)['values']
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],item[2],pr.Quantity_price,pr.Amount,item[5]))
-                    self.treeview_1.delete(focused)
+                    self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Quantity_price,pr.Amount,item[5]))
             else:
+                focused = self.treeview_1.focus()
+                item = self.treeview_1.item(focused)['values']
                 pr.Amount = (self.entry_1.get(),self.master)
-                if pr.final_prod_check([pr.Amount]):
+                if pr.final_prod_check([pr.Amount]) and DB_Connection.check_amount_correctness(self.master,pr.Amount, item[2], item[0]):
                     DB_Connection.edit_sale(self.master,pr,self.id)
-                    focused = self.treeview_1.focus()
-                    item = self.treeview_1.item(focused)['values']
-                    self.treeview_1.insert("", str(focused)[1:], values=(self.id,item[1],item[2],pr.Amount,item[4]))
-                    self.treeview_1.delete(focused)
+                    self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Amount,item[4]))
+            for item in self.treeview_1.selection():
+                self.treeview_1.selection_remove(item)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz edytować')
 
     def delete(self,event):
         if self.id is not None and self.treeview_1.selection() != ():
             if self.type == 0:
-                DB_Connection.delete_product(self.id)
+                if messagebox.askquestion(title='Pytanie', message='Usunięcie produktu skutkuje również usunięciem wszystkich danych powiązanych. Kontynuować?', parent=self.master) == 'yes':
+                    focused = self.treeview_1.focus()
+                    DB_Connection.delete_product(self.id)
+                    self.treeview_1.delete(focused)
             else:
-                DB_Connection.delete_supply_or_sale(self.id)
-            focused = self.treeview_1.focus()
-            self.treeview_1.delete(focused)
+                focused = self.treeview_1.focus()
+                item = self.treeview_1.item(focused)['values']
+                if DB_Connection.check_amount_correctness(self.master, 0, item[2], self.id):
+                    DB_Connection.delete_supply_or_sale(self.id)
+                    self.treeview_1.delete(focused)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz usunąć')
 
@@ -293,12 +315,14 @@ class Edit:
         self.entry_2.delete(0,END) 
         self.entry_3.delete(0,END)
         self.entry_4.delete(0,END)
+        self.combobox_3.set('')
         item = self.treeview_1.item(selected)['values']
         self.id = item[0]
         self.entry_1.insert(0,item[1])
         self.entry_2.insert(0,item[2])
         self.entry_3.insert(0,item[3])
         self.entry_4.insert(0,item[4])
+        self.combobox_3.set(item[5])
 
     def on_select_supplies(self,event):
         selected = event.widget.focus()

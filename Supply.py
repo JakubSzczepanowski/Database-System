@@ -5,7 +5,6 @@ import DB_Connection
 
 class Supply:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
@@ -60,7 +59,8 @@ class Supply:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
-        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
+        self.combobox_2.set('')
+        self.combobox_2['values'] = DB_Connection.get_products_for_section(self.combobox_1['values'][self.combobox_1.current()])
 
     def add_supply(self,event):
         s,n = self.combobox_1.current(),self.combobox_2.current()

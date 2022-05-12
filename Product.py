@@ -22,6 +22,7 @@ class Product:
             self.netto_price = None
             self.vat_percentage = None
             self.date = None
+            self.season = None
     
     @property
     def Name(self):
@@ -100,6 +101,14 @@ class Product:
     def Date(self,n):
         self.date = n
 
+    @property
+    def Season(self):
+        return self.season
+
+    @Season.setter
+    def Season(self,n):
+        self.season = n
+
     def check_int_correctness(self,obj,n:str,x:int,y:int) -> int:
         try:
             if n == '':
@@ -107,7 +116,7 @@ class Product:
             elif len(n) < x or len(n) > y:
                 raise E.ValueOutOfRangeError
             n = int(n)
-            if n < 0:
+            if n <= 0:
                 raise E.NegativeValueError
         except ValueError:
             messagebox.showerror(parent=obj,title='Błąd',message='W polu przeznaczonym na liczbę wstawiono znaki')
@@ -125,7 +134,7 @@ class Product:
             elif len(n.split('.')[0]) < x or len(n.split('.')[0]) > y:
                 raise E.ValueOutOfRangeError
             n = round(float(n),2)
-            if n < 0:
+            if n <= 0:
                 raise E.NegativeValueError
         except ValueError as e:
             messagebox.showerror(parent=obj,title='Błąd',message='W polu przeznaczonym na liczbę wstawiono znaki')

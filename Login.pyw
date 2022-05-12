@@ -5,7 +5,6 @@ import DB_Connection
 
 class Login:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
@@ -34,7 +33,6 @@ class Login:
         self.frame_1.configure(height='200', width='200')
         self.frame_1.pack(side='top')
 
-        # Main widget
         self.mainwindow = self.frame_1
         self.master.resizable(0,0)
         x = self.master.winfo_screenwidth() // 2 - 240 // 2 - 10
@@ -45,23 +43,18 @@ class Login:
     def login(self,event):
         import hashlib
         import os.path
-        if os.path.isfile('login.users'):
-            pary = {}
-            sh = hashlib.sha1()
+        if os.path.isfile('login.user'):
+            sh = hashlib.sha3_256()
             sh.update(self.entry_1.get().encode('utf-8'))
-            hash_value1 = sh.hexdigest()
+            hash_value1 = sh.digest()
             del sh
-            sh = hashlib.sha1()
+            sh = hashlib.sha3_256()
             sh.update(self.entry_2.get().encode('utf-8'))
-            hash_value2 = sh.hexdigest()
-            podane = (hash_value1, hash_value2)
+            hash_value2 = sh.digest()
             del sh
-            with open('login.users','r') as f:
-                for linia in f:
-                    p = linia.strip().split(' - ')
-                    pary[p[0]] = p[1]
-            for i in pary.items():
-                if podane == i:
+            with open('login.user','br') as f:
+                content = f.read()
+                if hash_value1 == content[:32] and hash_value2 == content[32:]:
                     if not os.path.isfile('database.db'):
                         import DB_Setup
                         r = tk.Tk()
@@ -72,18 +65,14 @@ class Login:
                         import main
                         root = tk.Tk()
                         app = main.Main(root)
-                        app.master.protocol("WM_DELETE_WINDOW", lambda arg=app.master: self.close_window(arg))
                         self.master.destroy()
                         DB_Connection.open_connection()
                         app.run()
                 else:
                     messagebox.showerror('Błąd logowania','Niepoprawne login lub hasło')
         else:
-            messagebox.showerror('Błąd logowania','Brakuje pliku konfiguracyjnego login.users')
+            messagebox.showerror('Błąd logowania','Brakuje pliku konfiguracyjnego login.user')
 
-    def close_window(self, win):
-        DB_Connection.close_connection()
-        win.destroy()
 
     def run(self):
         self.mainwindow.mainloop()

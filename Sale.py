@@ -2,12 +2,10 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 import DB_Connection
-import Exceptions as E
 
 
 class Sale:
     def __init__(self, master=None):
-        # build ui
         self.master = master
         self.frame_1 = ttk.Frame(self.master)
         self.label_1 = ttk.Label(self.frame_1)
@@ -54,7 +52,8 @@ class Sale:
         self.combobox_1['values'] = DB_Connection.get_sections()
 
     def fill_combobox2(self,event):
-        self.combobox_2['values'] = DB_Connection.get_products(self.combobox_1['values'][self.combobox_1.current()])
+        self.combobox_2.set('')
+        self.combobox_2['values'] = DB_Connection.get_products_for_section(self.combobox_1['values'][self.combobox_1.current()])
 
     def add_sale(self,event):
         s,n = self.combobox_1.current(),self.combobox_2.current()
@@ -65,9 +64,8 @@ class Sale:
             pr.Section = (self.combobox_1['values'][s],self.master)
             pr.Name = (self.combobox_2['values'][n],self.master)
             pr.Amount = (self.entry_1.get(),self.master)
-            if DB_Connection.check_amount_correctness(self.master,pr.Amount):
+            if pr.final_prod_check([pr.Amount]) and DB_Connection.check_amount_correctness(self.master,pr.Amount, pr.Name, None):
                 pr.Date = datetime.today().strftime('%Y-%m-%d')
-                if pr.final_prod_check([pr.Amount,pr.Date]):
-                    DB_Connection.insert_sale(self.master,pr)
+                DB_Connection.insert_sale(self.master,pr)
         else:
             messagebox.showerror(parent=self.master,title='Błąd',message='Podaj dział i nazwę')
