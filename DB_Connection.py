@@ -135,6 +135,7 @@ def select_amount_and_date_for_specific_product(name):
     return cursor.fetchall()
 
 def delete_product(id):
+    cursor.execute("DELETE FROM Data WHERE id_product=?",(id,))
     cursor.execute("DELETE FROM Products WHERE id_product=?",(id,))
     conn.commit()
 
@@ -142,9 +143,11 @@ def delete_supply_or_sale(id):
     cursor.execute("DELETE FROM Data WHERE id_record=?",(id,))
     conn.commit()
 
-def check_amount_correctness(obj,amount,name):
+def check_amount_correctness(obj,amount,name,id):
     try:
-        cursor.execute(f"SELECT amount,quantity_price FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Products.name='{name}'")
+        query = f"SELECT amount,quantity_price FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Products.name='{name}'"
+        if id is not None: query += f" AND Data.id_record <> {id}"
+        cursor.execute(query)
         result = 0
         for elem in cursor.fetchall():
             result += elem[0] if elem[1] is not None else -elem[0]
@@ -174,13 +177,14 @@ def insert_product(obj,prod):
         messagebox.showinfo(parent=obj,title='Info',message='Produkt został pomyślnie dodany')
 
 def edit_product(obj,prod,id):
-    try:
-        cursor.execute(f"""UPDATE Products SET name=?,netto_price=?,
-        vat_percentage=?,section=?,season=? WHERE id_product=?
-        """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,prod.Season,id))
-        conn.commit()
-    except Exception as e:
-        messagebox.showerror(parent=obj,title='Błąd',message=e)
+    cursor.execute(f"SELECT name FROM Products WHERE section='{prod.Section}' AND id_product <> {id}")
+    for elem in cursor.fetchall():
+        if elem[0] == prod.Name:
+            raise E.NameInThatSectionExistError
+    cursor.execute(f"""UPDATE Products SET name=?,netto_price=?,
+    vat_percentage=?,section=?,season=? WHERE id_product=?
+    """,(prod.Name,prod.Netto_price,prod.Vat_percentage,prod.Section,prod.Season,id))
+    conn.commit()
 
 def edit_supply(obj,prod,id):
     try:
@@ -214,9 +218,9 @@ def insert_supply(obj,prod):
 def insert_sale(obj,prod):
     try:
         cursor.execute(f"SELECT id_record, date, amount FROM Data JOIN Products ON Data.id_product=Products.id_product WHERE Data.quantity_price IS NULL AND Products.name='{prod.Name}' ORDER BY Data.id_record DESC LIMIT 1")
-        last_supply = cursor.fetchone()
-        if last_supply is not None and last_supply[1] == prod.Date:
-            cursor.execute(f"UPDATE Data SET amount={last_supply[2]+prod.Amount} WHERE id_record = {last_supply[0]}")
+        last_sale = cursor.fetchone()
+        if last_sale is not None and last_sale[1] == prod.Date:
+            cursor.execute(f"UPDATE Data SET amount={last_sale[2]+prod.Amount} WHERE id_record = {last_sale[0]}")
         else:
             cursor.execute(f"SELECT id_product FROM Products WHERE name='{prod.Name}' AND section='{prod.Section}'")
             id_product = cursor.fetchone()[0]

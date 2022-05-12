@@ -267,9 +267,12 @@ class Edit:
                 pr.Section = (self.entry_4.get(),self.master)
                 pr.Season = self.combobox_3['values'][self.combobox_3.current()]
                 if pr.final_prod_check([pr.Section,pr.Name,pr.Netto_price,pr.Vat_percentage]):
-                    DB_Connection.edit_product(self.master,pr,self.id)
-                    focused = self.treeview_1.focus()
-                    self.treeview_1.item(focused, values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section,pr.Season))
+                    try:
+                        DB_Connection.edit_product(self.master,pr,self.id)
+                        focused = self.treeview_1.focus()
+                        self.treeview_1.item(focused, values=(self.id,pr.Name,pr.Netto_price,pr.Vat_percentage,pr.Section,pr.Season))
+                    except Exception as e:
+                        messagebox.showerror(parent=self.master,title='Błąd',message=e)
             elif self.type == 1:
                 pr.Quantity_price = (self.entry_1.get(),self.master)
                 pr.Amount = (self.entry_2.get(),self.master)
@@ -282,20 +285,27 @@ class Edit:
                 focused = self.treeview_1.focus()
                 item = self.treeview_1.item(focused)['values']
                 pr.Amount = (self.entry_1.get(),self.master)
-                if pr.final_prod_check([pr.Amount]) and DB_Connection.check_amount_correctness(self.master,pr.Amount, item[2]):
+                if pr.final_prod_check([pr.Amount]) and DB_Connection.check_amount_correctness(self.master,pr.Amount, item[2], item[0]):
                     DB_Connection.edit_sale(self.master,pr,self.id)
                     self.treeview_1.item(focused, values=(self.id,item[1],item[2],pr.Amount,item[4]))
+            for item in self.treeview_1.selection():
+                self.treeview_1.selection_remove(item)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz edytować')
 
     def delete(self,event):
         if self.id is not None and self.treeview_1.selection() != ():
             if self.type == 0:
-                DB_Connection.delete_product(self.id)
+                if messagebox.askquestion(title='Pytanie', message='Usunięcie produktu skutkuje również usunięciem wszystkich danych powiązanych. Kontynuować?', parent=self.master) == 'yes':
+                    focused = self.treeview_1.focus()
+                    DB_Connection.delete_product(self.id)
+                    self.treeview_1.delete(focused)
             else:
-                DB_Connection.delete_supply_or_sale(self.id)
-            focused = self.treeview_1.focus()
-            self.treeview_1.delete(focused)
+                focused = self.treeview_1.focus()
+                item = self.treeview_1.item(focused)['values']
+                if DB_Connection.check_amount_correctness(self.master, 0, item[2], self.id):
+                    DB_Connection.delete_supply_or_sale(self.id)
+                    self.treeview_1.delete(focused)
         else:
             messagebox.showerror(parent=self.master, title='Błąd',message='Zaznacz element, który chcesz usunąć')
 
